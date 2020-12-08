@@ -16,3 +16,6 @@ TFL_Updates/test_helpers/
 # ESRI toolboxes
 *.tbx
 **/toolboxes
+
+#PF_updates
+/PF_Updates
