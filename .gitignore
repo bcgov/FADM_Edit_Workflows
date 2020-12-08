@@ -1,0 +1,18 @@
+#configuration
+TFL_Updates/TFL_Config.py
+
+#compiled files
+*.pyc
+
+#helper_code 
+TFL_Updates/test_helpers/
+
+#vscode files
+**/.vscode
+
+#config_folder
+**/config_files
+
+# ESRI toolboxes
+*.tbx
+**/toolboxes
