@@ -11,6 +11,7 @@
 
 # Import modules
 import arcpy, sys, os, datetime, shutil, getpass
+from os.path import join
 from datetime import datetime
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
@@ -32,8 +33,11 @@ bcgw_pw = arcpy.GetParameterAsText(2)
 change_description = arcpy.GetParameterAsText(3) #Text input - short statement of the nature of the change
 change_summary = arcpy.GetParameterAsText(4) #Text input - short paragraph (or less) with detail as required
 
-input_folder = TFL_WORKING_FOLDERS + os.sep + input_tfl
-input_gdb = input_folder + os.sep +'Data' + os.sep + 'FADM_' + input_tfl + '.gdb'
+# Global path variables used throughout
+input_folder = join(TFL_WORKING_FOLDERS, input_tfl)
+input_gdb = join(input_folder, 'Data', 'FADM_' + input_tfl + '.gdb')
+current_tfl_layer_name = join(input_gdb, 'TFL_Data', input_tfl)
+final_tfl_layer_name = join(TFL_FINAL_FOLDERS, input_tfl, 'data', 'FADM_' + input_tfl + '.gdb', 'TFL_Data', input_tfl)
 
 
 def runapp(TFL_Prepare_Review_Package):
@@ -107,10 +111,9 @@ def check_prerequisites(input_gdb,input_tfl, BCGWConnection):
 
     transaction_details = input_gdb + os.sep + input_tfl + '_Transaction_Details'
 
-    #IAN - consider making global variables for functions using same data
-    tfl_lines = input_gdb + os.sep + 'TFL_Data' + os.sep + input_tfl + '_Line'
-    tfl_schedule_a = input_gdb + os.sep + 'TFL_Data' + os.sep + input_tfl + '_Schedule_A'
-    tfl_poly = input_gdb + os.sep + 'TFL_Data' + os.sep + input_tfl + '_Boundary'
+    tfl_lines = current_tfl_layer_name + '_Line'
+    tfl_schedule_a = current_tfl_layer_name + '_Schedule_A'
+    tfl_poly = current_tfl_layer_name + '_Boundary'
 
     table_object = geobc.TableInfo()
     check_edits_date = table_object.get_last_date(transaction_details,'Check_Edits_Date')
@@ -174,9 +177,9 @@ def check_poly(tfl_poly, input_gdb, BCGWConnection):
         del row
     del cursor
     if domain_error:
-        arcpy.AddWarning('WARNNG: One or more TFL_Boundary features are not using domain values in ' + str(domain_error))
+        arcpy.AddWarning('WARNING: One or more TFL_Boundary features are not using domain values in ' + str(domain_error))
     if not poly_type_set:
-        arcpy.AddWarning('WARNNG: One or more TFL_Boundary features missing a Poly_Type')
+        arcpy.AddWarning('WARNING: One or more TFL_Boundary features missing a Poly_Type')
     if (not poly_type_set) or domain_error:
 
         return(False)
@@ -213,13 +216,14 @@ def save_changes_to_gdb(input_gdb,input_tfl,bcgw_connection):
     check_out_date = check_out_date.strftime("%b %d %Y %H:%M:%S") #format to string for use in query
 
     arcpy.AddMessage('Checked out on ' + check_out_date)
-    tfl_lines = input_gdb + os.sep + 'TFL_Data' + os.sep + input_tfl + '_Line' #global?
-    schedule_a = input_gdb + os.sep + 'TFL_Data' + os.sep + input_tfl + '_Schedule_A' #global?
+    tfl_lines = current_tfl_layer_name + '_Line' 
+    schedule_a = current_tfl_layer_name + '_Schedule_A' 
+
     #make a feature layer of the boundary poly not including any deletion areas for the comparison
-    boundary = input_gdb + os.sep + 'TFL_Data' + os.sep + input_tfl + '_Boundary'
-    arcpy.MakeFeatureLayer_management(boundary, 'Boundary_fl', "Poly_Type <> 'Deletion'"), #global?
-    boundary_final = TFL_FINAL_FOLDERS + os.sep + input_tfl + os.sep + 'data' + os.sep + 'FADM_' + input_tfl + '.gdb' + os.sep + 'TFL_Data' + os.sep + input_tfl + '_Boundary' #global?
-    schedule_a_final = TFL_FINAL_FOLDERS + os.sep + input_tfl + os.sep + 'data' + os.sep + 'FADM_' + input_tfl + '.gdb' + os.sep + 'TFL_Data' + os.sep + input_tfl + '_Schedule_A' #global?
+    boundary = current_tfl_layer_name + '_Boundary'
+    arcpy.MakeFeatureLayer_management(boundary, 'Boundary_fl', "Poly_Type <> 'Deletion'")
+    boundary_final = final_tfl_layer_name + '_Boundary' 
+    schedule_a_final = final_tfl_layer_name + '_Schedule_A' 
 
     #make a feature layer of the changed lines - if there are any - save to database
     if arcpy.Exists(input_gdb + os.sep + input_tfl + '_Line_Changes'):
@@ -229,14 +233,19 @@ def save_changes_to_gdb(input_gdb,input_tfl,bcgw_connection):
     arcpy.Delete_management(changed_lines)
 
     #Get a difference layer for the TFL Boundary (compare to TFL Final)
-    if arcpy.Exists(input_gdb + os.sep + input_tfl + '_Boundary_Difference'):
-        arcpy.Delete_management(input_gdb + os.sep + input_tfl + '_Boundary_Difference')
-    arcpy.SymDiff_analysis(boundary,'boundary_fl',input_gdb + os.sep + input_tfl + '_Boundary_Difference')
+    final_boundary_diff = join(input_gdb, input_tfl+'_Boundary_Difference')
+
+    if arcpy.Exists(final_boundary_diff):
+        arcpy.Delete_management(final_boundary_diff)
+
+    arcpy.SymDiff_analysis(boundary, 'Boundary_fl', final_boundary_diff)
 
     #Difference layer TFL Schedule A from Final
-    if arcpy.Exists(input_gdb + os.sep + input_tfl + '_Schedule_A_Difference'):
-        arcpy.Delete_management(input_gdb + os.sep + input_tfl + '_Schedule_A_Difference')
-    arcpy.SymDiff_analysis(schedule_a,schedule_a_final,input_gdb + os.sep + input_tfl + '_Schedule_A_Difference')
+    final_sched_a_diff = join(input_gdb, input_tfl+'_Schedule_A_Difference')
+
+    if arcpy.Exists(final_sched_a_diff):
+        arcpy.Delete_management(final_sched_a_diff)
+    arcpy.SymDiff_analysis(schedule_a, schedule_a_final, final_sched_a_diff)
 
     #set up parameters for
     #Schedule A and Current boundary Difference layers from BCGW to final
@@ -249,45 +258,54 @@ def save_changes_to_gdb(input_gdb,input_tfl,bcgw_connection):
     else:
         ffid = input_tfl.replace('_','')
 
-    bcgw_sched_a_fl = arcpy.MakeFeatureLayer_management(sched_a_whse, 'bcgw_sched_a_fl', "FOREST_FILE_ID = '" + ffid + "'")
-    if arcpy.Exists(input_gdb + os.sep + input_tfl + '_Sched_A_BCGW_Difference'):
-        arcpy.Delete_management(input_gdb + os.sep + input_tfl + '_Sched_A_BCGW_Difference')
-    arcpy.SymDiff_analysis(bcgw_sched_a_fl,schedule_a_final,input_gdb + os.sep + input_tfl + '_Sched_A_BCGW_Difference')
+    bcgw_sched_a_diff = join(input_gdb, input_tfl+'_Sched_A_BCGW_Difference')    
+
+    bcgw_sched_a_fl = arcpy.MakeFeatureLayer_management(sched_a_whse, 'bcgw_sched_a_fl', "FOREST_FILE_ID = '" + ffid + "' AND RETIREMENT_DATE IS NULL")
+
+    if arcpy.Exists(bcgw_sched_a_diff):
+        arcpy.Delete_management(bcgw_sched_a_diff)
+
+    arcpy.SymDiff_analysis(bcgw_sched_a_fl, schedule_a_final, bcgw_sched_a_diff)
     arcpy.Delete_management(bcgw_sched_a_fl)
 
     #make a difference layer between previous final and BCGW
+    bcgw_boundary_diff = join(input_gdb, input_tfl + '_Boundary_BCGW_Difference')
+
     bcgw_boundary_fl = arcpy.MakeFeatureLayer_management(tfl_whse,'bcgw_boundary_fl', "FOREST_FILE_ID = '" + ffid + "'")
-    if arcpy.Exists(input_gdb + os.sep + input_tfl + '_Boundary_BCGW_Difference'):
-        arcpy.Delete_management(input_gdb + os.sep + input_tfl + '_Boundary_BCGW_Difference')
-    arcpy.SymDiff_analysis(bcgw_boundary_fl,'boundary_fl',input_gdb + os.sep + input_tfl + '_Boundary_BCGW_Difference')
+    if arcpy.Exists(bcgw_boundary_diff):
+        arcpy.Delete_management(bcgw_boundary_diff)
+    arcpy.SymDiff_analysis(bcgw_boundary_fl,'boundary_fl',bcgw_boundary_diff)
     arcpy.Delete_management(bcgw_boundary_fl)
     arcpy.Delete_management('boundary_fl')
 
     #Check the difference layers - if there are any differences notify the editor - otherwise - delete them
     #NOTE: this is pretty repetetive and should probably be within a function
-    if int(arcpy.GetCount_management(input_gdb + os.sep + input_tfl + '_Sched_A_BCGW_Difference')[0]) > 0:
+    if int(arcpy.GetCount_management(bcgw_sched_a_diff)[0]) > 0:
         arcpy.AddMessage('Saving Schedule A difference layer for BCGW to Final')
     else:
         arcpy.AddMessage('No differences found for Schedule A final to BCGW')
-        arcpy.Delete_management(input_gdb + os.sep + input_tfl + '_Sched_A_BCGW_Difference')
+        arcpy.Delete_management(bcgw_sched_a_diff)
 
-    if int(arcpy.GetCount_management(input_gdb + os.sep + input_tfl + '_Boundary_BCGW_Difference')[0]) > 0:
+    if int(arcpy.GetCount_management(bcgw_boundary_diff)[0]) > 0:
         arcpy.AddMessage('Saving Boundary difference layer for BCGW to Final')
     else:
         arcpy.AddMessage('No differences found for Boundary final to BCGW')
-        arcpy.Delete_management(input_gdb + os.sep + input_tfl + '_Boundary_BCGW_Difference')
+        arcpy.Delete_management(bcgw_boundary_diff)
 
-    if int(arcpy.GetCount_management(input_gdb + os.sep + input_tfl + '_Schedule_A_Difference')[0]) > 0:
+    if int(arcpy.GetCount_management(final_sched_a_diff)[0]) > 0:
         arcpy.AddMessage('Saving difference layer for schedule A')
     else:
         arcpy.AddMessage('No differences found for Schedule A')
-        arcpy.Delete_management(input_gdb + os.sep + input_tfl + '_Schedule_A_Difference')
+        arcpy.Delete_management(final_sched_a_diff)
 
-    if int(arcpy.GetCount_management(input_gdb + os.sep + input_tfl + '_Boundary_Difference')[0]) > 0:
+    if int(arcpy.GetCount_management(final_boundary_diff)[0]) > 0:
         arcpy.AddMessage('Saving difference layer for boundary')
     else:
         arcpy.AddMessage('No differences found for boundary')
-        arcpy.Delete_management(input_gdb + os.sep + input_tfl + '_Boundary_Difference')
+        arcpy.Delete_management(final_boundary_diff)
+
+def difference_layer_check():
+    pass
 
 def create_review_map(inputgdb,input_tfl):
     """Takes input database and makes a copy of the review template. Checks for all derived layers in the edit
