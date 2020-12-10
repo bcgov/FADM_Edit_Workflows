@@ -321,11 +321,11 @@ def check_bcgw_to_final_differences(tfl_basename, input_gdb, BCGWConnection): #I
     #Compare TFL Current View sources
     boundary_diff = join(input_gdb, folder_basename+'_Boundary_BCGW_Difference')
 
-    bcgw_boundary_fl = arcpy.MakeFeatureLayer_management(tfl_whse,'bcgw_boundary_fl', "FOREST_FILE_ID = '" + folder_basename.replace('_',' ') + "' AND RETIREMENT_DATE IS NULL")
+    bcgw_boundary_fl = arcpy.MakeFeatureLayer_management(tfl_whse,'bcgw_boundary_fl', "FOREST_FILE_ID = '" + folder_basename.replace('_',' ') + "'")
     if arcpy.Exists(boundary_diff):
         arcpy.Delete_management(boundary_diff)
 
-    arcpy.SymDiff_analysis(bcgw_boundary_fl, boundary_final, boundary_diff)
+    arcpy.SymDiff_analysis(bcgw_boundary_fl,boundary_final,boundary_diff)
 
     #Check the difference layers - if there are any differences warn the editor - otherwise - delete them
     if int(arcpy.GetCount_management(sched_a_diff)[0]) > 0:
