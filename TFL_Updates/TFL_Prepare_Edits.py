@@ -11,6 +11,7 @@
 
 # Import modules
 import arcpy, sys, os, datetime, shutil, getpass
+from os.path import join
 from datetime import datetime
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
@@ -103,7 +104,7 @@ def copy_input_tfl(folder_basename):
         arcpy.Copy_management(input_tfl + os.sep + 'data' + os.sep + 'FADM_' + folder_basename + '.gdb', \
         TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + 'data' + os.sep + 'FADM_' + folder_basename + '.gdb')
 ##        shutil.copytree(input_tfl + os.sep + 'data',TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + 'data')
-        arcpy.AddMessage('Completed copy from TFL Final')
+        arcpy.AddMessage('Completed copy from TFL Final\n')
         return(True)
     else:
         arcpy.AddError(folder_basename + ' already exits in 2_TFL_Edits Folder. Please review data within existing folder to ensure no-one else is working on TFL edits')
@@ -129,14 +130,14 @@ def delete_tables(workspace):
         if not tables == []:
             for table in tables:
                 if not (str(table)[-14:] == 'Change_History'):
-                    arcpy.AddMessage('deleting table: ' + table)
+                    arcpy.AddMessage('----- deleting table: ' + table)
                     arcpy.Delete_management(table)
         #delete any feature classes that were added to the geodatabase
         feature_classes = arcpy.ListFeatureClasses()
         for feature_class in feature_classes:
-            arcpy.AddMessage('deleting feature class: ' + feature_class)
+            arcpy.AddMessage('----- deleting feature class: ' + feature_class)
             arcpy.Delete_management(feature_class)
-        arcpy.AddMessage('Completed delete tables')
+        arcpy.AddMessage('Completed delete tables\n')
 
 def copy_tables_from_template(workspace, folder_basename):
     """Copies tables from the template database to the edit workspace - excluding TFL Lines and Schedule A"""
@@ -166,7 +167,7 @@ def copy_tables_from_template(workspace, folder_basename):
                     arcpy.Copy_management(source, destination)
                     arcpy.AlterAliasName(destination,folder_basename + (table)[6:])
                     arcpy.AddMessage('Copied ' + table + ' from template')
-        arcpy.AddMessage('Completed copy of tables from template database')
+        arcpy.AddMessage('Completed copy of tables from template database\n')
 
 def delete_non_active_lines(workspace, folder_basename):
     """Deletes any lines that do not have Status Code = ACTIVE from the TFL Lines - these should represent the current boundary"""
@@ -180,7 +181,7 @@ def delete_non_active_lines(workspace, folder_basename):
     else:
         arcpy.AddMessage('Did not find any non-active lines')
     #IAN - return something if it can't even evaluate the selectLayerByAttribute...e.g., #arcpy.GetMessages()
-    arcpy.AddMessage('Completed search and delete function for non-active lines')
+    arcpy.AddMessage('Completed search and delete function for non-active lines\n')
 
 def create_polys(input_workspace, folder_basename):
     """"Takes input TFL lines and attempts to build polygons to a temp layer. If build
@@ -198,11 +199,11 @@ def create_polys(input_workspace, folder_basename):
 
     arcpy.FeatureToPolygon_management('tfl_lines_layer', input_workspace + os.sep + 'Temp_Poly')
     if int(arcpy.GetCount_management(input_workspace + os.sep + 'Temp_Poly').getOutput(0)) == 0:
-        arcpy.AddWarning("Warning - No polygons created using input active lines")
+        arcpy.AddWarning("===== Warning - No polygons created using input active lines\n")
         arcpy.Delete_management(input_workspace + os.sep + 'Temp_Poly')
     else:
         #If there are any records then at least one polygon built - inform user
-        arcpy.AddMessage('One or more polygons created from active input lines')
+        arcpy.AddMessage('One or more polygons created from active input lines\n')
         arcpy.Delete_management(input_workspace + os.sep + 'Temp_Poly')
 
 def create_topology(workspace, folder_basename):
@@ -289,14 +290,16 @@ def get_bcgw_connection(bcgw_uname, bcgw_pw):
 
 def check_bcgw_to_final_differences(tfl_basename, input_gdb, BCGWConnection): #IAN - use standard variable names here
     """takes input folder and bcgw connection - compares the TFL Final with BCGW for schedule A and boundary and
-    saves any differnces between them to the edit database."""
+    saves any differences between them to the edit database."""
 
-    #This function is also implimented in TFL_Prepare_Review_Package.py
-    boundary_final = TFL_FINAL_FOLDER + os.sep + folder_basename + os.sep + 'data' + os.sep + 'FADM_' + folder_basename + '.gdb' + os.sep + 'TFL_Data' + os.sep + folder_basename + '_Boundary'
-    schedule_a_final = TFL_FINAL_FOLDER + os.sep + folder_basename + os.sep + 'data' + os.sep + 'FADM_' + folder_basename + '.gdb' + os.sep + 'TFL_Data' + os.sep + folder_basename + '_Schedule_A'
+    final_tfl_data_folder = join(TFL_FINAL_FOLDER, folder_basename, 'data', 'FADM_' + folder_basename + '.gdb', 'TFL_Data')
+
+    #This function is also implemented in TFL_Prepare_Review_Package.py
+    boundary_final = join(final_tfl_data_folder, folder_basename + '_Boundary')
+    schedule_a_final = join(final_tfl_data_folder, folder_basename + '_Schedule_A')
 
 
-    arcpy.AddMessage('checking differences between warehouse and final')
+    arcpy.AddMessage('Checking differences between BCGW and final TFLs...')
 
     tfl_whse = BCGWConnection + '\\WHSE_ADMIN_BOUNDARIES.FADM_TFL_ALL_SP'
     sched_a_whse = BCGWConnection + '\\WHSE_ADMIN_BOUNDARIES.FADM_TFL_SCHED_A'
@@ -307,33 +310,37 @@ def check_bcgw_to_final_differences(tfl_basename, input_gdb, BCGWConnection): #I
         sched_a_ffid = folder_basename.replace('_','')
 
     #Compare Schedule A sources
-    bcgw_sched_a_fl = arcpy.MakeFeatureLayer_management(sched_a_whse, 'bcgw_sched_a_fl', "FOREST_FILE_ID = '" + sched_a_ffid + "'")
-    if arcpy.Exists(input_gdb + os.sep + folder_basename + '_Sched_A_BCGW_Difference'):
-        arcpy.Delete_management(input_gdb + os.sep + folder_basename + '_Sched_A_BCGW_Difference')
-    arcpy.SymDiff_analysis(bcgw_sched_a_fl,schedule_a_final,input_gdb + os.sep + folder_basename + '_Sched_A_BCGW_Difference')
+    sched_a_diff = join(input_gdb, folder_basename+'_Sched_A_BCGW_Difference')
+
+    bcgw_sched_a_fl = arcpy.MakeFeatureLayer_management(sched_a_whse, 'bcgw_sched_a_fl', "FOREST_FILE_ID = '" + sched_a_ffid + "' AND RETIREMENT_DATE IS NULL")
+    if arcpy.Exists(sched_a_diff):
+        arcpy.Delete_management(sched_a_diff)
+
+    arcpy.SymDiff_analysis(bcgw_sched_a_fl, schedule_a_final, sched_a_diff)
 
     #Compare TFL Current View sources
+    boundary_diff = join(input_gdb, folder_basename+'_Boundary_BCGW_Difference')
+
     bcgw_boundary_fl = arcpy.MakeFeatureLayer_management(tfl_whse,'bcgw_boundary_fl', "FOREST_FILE_ID = '" + folder_basename.replace('_',' ') + "'")
-    if arcpy.Exists(input_gdb + os.sep + folder_basename + '_Boundary_BCGW_Difference'):
-        arcpy.Delete_management(input_gdb + os.sep + folder_basename + '_Boundary_BCGW_Difference')
-    arcpy.SymDiff_analysis(bcgw_boundary_fl,boundary_final,input_gdb + os.sep + folder_basename + '_Boundary_BCGW_Difference')
+    if arcpy.Exists(boundary_diff):
+        arcpy.Delete_management(boundary_diff)
+
+    arcpy.SymDiff_analysis(bcgw_boundary_fl,boundary_final,boundary_diff)
 
     #Check the difference layers - if there are any differences warn the editor - otherwise - delete them
-    if int(arcpy.GetCount_management(input_gdb + os.sep + folder_basename + '_Sched_A_BCGW_Difference')[0]) > 0:
-        arcpy.AddWarning('Warning: differences found in Schedule A: TFL Final and BCGW are not equal')
-
+    if int(arcpy.GetCount_management(sched_a_diff)[0]) > 0:
+        arcpy.AddWarning('===== Warning: differences found in Schedule A: TFL Final and BCGW are not equal')
         arcpy.AddWarning('Make sure to check the _Sched_A_BCGW_Difference dataset in the working folder to review and resolve differences')
-        print('Warning: differences found in Schedule A: TFL Final and BCGW are not equal')
     else:
-        arcpy.AddMessage('No differences found for Schedule A')
-        arcpy.Delete_management(input_gdb + os.sep + folder_basename + '_Sched_A_BCGW_Difference')
+        arcpy.AddMessage('No differences found between TFL Final Schedule A and BCGW Schedule A')
+        arcpy.Delete_management(sched_a_diff)
 
-    if int(arcpy.GetCount_management(input_gdb + os.sep + folder_basename + '_Boundary_BCGW_Difference')[0]) > 0:
-        arcpy.AddWarning('Warning: differences found in Boundary: TFL Final and BCGW are not equal')
-        arcpy.AddWarning('Make sure to check the _Boundary_BCGW_Differenc dataset in the working folder to review and resolve differences')
+    if int(arcpy.GetCount_management(boundary_diff)[0]) > 0:
+        arcpy.AddWarning('===== Warning: differences found in Boundary: TFL Final and BCGW are not equal')
+        arcpy.AddWarning('Make sure to check the _Boundary_BCGW_Differenc dataset in the working folder to review and resolve differences\n')
     else:
-        arcpy.AddMessage('No differences found for TFL Boundary')
-        arcpy.Delete_management(input_gdb + os.sep + folder_basename + '_Boundary_BCGW_Difference')
+        arcpy.AddMessage('No differences found between Final TFL Boundary and BCGW TFL Boundary\n')
+        arcpy.Delete_management(boundary_diff)
 
 
 def update_change_history(table, timestamp, user):
