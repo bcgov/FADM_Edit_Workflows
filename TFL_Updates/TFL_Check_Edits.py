@@ -65,16 +65,16 @@ def runapp(tfl_check_edits):
             if topology_result is True and attributes_result is True and build_result is True:
                 #Mark as passed and update table
                 update_transaction_details(input_gdb,tfl_basename,"Yes")
-                arcpy.AddMessage('Script completed with no errors - data can proceed to review stage when ready \
-                - any changes to data will require this script to be re-run')
+                arcpy.AddMessage('\nScript completed with no errors - data can proceed to review stage when ready.\n \
+                Any changes to data will require this script to be re-run')
             else:
                 #Mark as failed
                 update_transaction_details(input_gdb,tfl_basename,"No")
-                arcpy.AddWarning('Script completed with errors found - please review the error messages and \
+                arcpy.AddWarning('\nScript completed with errors found - please review the error messages and \
                 correct before re-running test')
 
         else:
-            arcpy.AddError('Problem creating BCGW Connection - please re-enter credentials')
+            arcpy.AddError('\nProblem creating BCGW Connection - please re-enter credentials')
 
 ###############################################################################
 ## Functions section
@@ -141,10 +141,10 @@ def run_topology(input_gdb):
                 arcpy.Delete_management(feature_class)
 
     if not errors:
-        arcpy.AddMessage('No topology errors found')
+        arcpy.AddMessage('No topology errors found\n')
         return(True)
     else:
-        arcpy.AddWarning('Topology errors found - please review the topology results and correct')
+        arcpy.AddWarning('Topology errors found - please review the topology results and correct\n')
         for error in errors:
             arcpy.AddWarning(error)
         return(False)
@@ -167,10 +167,10 @@ def create_polys(input_gdb, tfl_lines, tfl_basename):
         if arcpy.Exists(input_gdb + os.sep + 'TFL_Data' + os.sep + 'Temp_Boundary_Points'):
             arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'Temp_Boundary_Points')
         #copy polygons to points to allow the attributes to be copied over later
-        arcpy.AddMessage('copying TFL boundary to temp points')
+        arcpy.AddMessage('----- copying TFL boundary to temp points')
         #Use feature to point to save poly attributes temporarily
         arcpy.FeatureToPoint_management(input_gdb + os.sep + 'TFL_Data' + os.sep + tfl_basename + '_Boundary','Temp_Boundary_Points', "INSIDE")
-        arcpy.AddMessage('deleting previous boundary')
+        arcpy.AddMessage('----- deleting previous boundary')
         arcpy.DeleteRows_management(input_gdb + os.sep + 'TFL_Data' + os.sep + tfl_basename + '_Boundary')
         #create temp poly using the points as attributes
         arcpy.FeatureToPolygon_management('tfl_lines_layer',input_gdb + os.sep + 'TFL_Data' + os.sep + 'Temp_Poly','','','Temp_Boundary_Points')
@@ -184,12 +184,12 @@ def create_polys(input_gdb, tfl_lines, tfl_basename):
         arcpy.FeatureToPolygon_management('tfl_lines_layer',input_gdb + os.sep + 'TFL_Data' + os.sep + 'Temp_Poly')
 
     if int(arcpy.GetCount_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'Temp_Poly').getOutput(0)) == 0:
-        arcpy.AddWarning("Error - No polygons created")
+        arcpy.AddWarning("===== Error - No polygons created\n")
         return(False)
     else:
 
         #Append Temp_Poly into empty _Boundary
-        arcpy.AddMessage('Appending new geometry to Boundary')
+        arcpy.AddMessage('Appending new geometry to TFL Boundary polygon')
         arcpy.Append_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'Temp_Poly',input_gdb + os.sep + 'TFL_Data' + os.sep + tfl_basename + '_Boundary', 'NO_TEST')
         arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'Temp_Poly')
 
@@ -204,7 +204,7 @@ def create_polys(input_gdb, tfl_lines, tfl_basename):
             forest_file_id = tfl_basename.replace('_','')
 
         #Populate the required fields
-        arcpy.AddMessage('Populating TFL attributes')
+        arcpy.AddMessage('----- Populating TFL Boundary polygon attributes\n')
         fields = ['FOREST_FILE_ID', 'FEATURE_CLASS_SKEY']
         with arcpy.da.UpdateCursor(input_gdb + os.sep + 'TFL_Data' + os.sep + tfl_basename + '_Boundary', fields) as cursor:
             for row in cursor:
@@ -245,7 +245,7 @@ def check_line_attributes(tfl_lines, domain_list):
 def get_bcgw_connection(bcgw_uname, bcgw_pw):
 # SET UP BCGW CONNECTION -----------------------------------------------------------------
     arcpy.AddMessage(" ")
-    arcpy.AddMessage("Setting up the BCGW connection...")
+    arcpy.AddMessage("Setting up the BCGW connection...\n")
 
     # Run the  "BCGWConnectionFileModule.create" function which creates the BCGW
     # connection file and save the pathname to the variable "BCGWConnection"
@@ -284,10 +284,10 @@ def check_tfl_overlaps(tfl_basename, input_gdb, BCGWConnection):
     arcpy.Delete_management(input_gdb + os.sep + 'tfl_whse_selection')
 
     if int(arcpy.GetCount_management(input_gdb + os.sep + 'TFL_Overlaps').getOutput(0)) > 0:
-        arcpy.AddWarning('Overlaps found with another TFL in BCGW Current View - please check the TFL Overlaps feature class in the working GDB')
+        arcpy.AddWarning('===== Overlaps found with another TFL in BCGW Current View - please check the TFL Overlaps feature class in the working GDB\n')
         return(False)
     else:
-        arcpy.AddMessage('No TFL overlaps found')
+        arcpy.AddMessage('No TFL overlaps found\n')
         arcpy.Delete_management(input_gdb + os.sep + 'TFL_Overlaps')
         return(True)
 
@@ -305,10 +305,10 @@ def check_schedule_a_is_within(tfl_basename, input_gdb):
     tfl_schedule_a = arcpy.MakeFeatureLayer_management(input_gdb + os.sep + tfl_basename + '_Schedule_A', 'tfl_schedule_a')
     schedule_a_outside = arcpy.Erase_analysis(tfl_schedule_a,tfl_boundary,'schedule_a_outside')
     if int(arcpy.GetCount_management(schedule_a_outside)[0])>0:
-        arcpy.AddWarning('Found Schedule A polygons outside of TFL Boundary - please review the schedule_a_outside feature class')
+        arcpy.AddWarning('===== Found Schedule A polygons outside of TFL Boundary - please review the schedule_a_outside feature class\n')
         return(False)
     else:
-        arcpy.AddMessage('Schedule A is all within the boundary')
+        arcpy.AddMessage('Schedule A is all within the boundary\n')
         arcpy.Delete_management(schedule_a_outside)
         return(True)
 
