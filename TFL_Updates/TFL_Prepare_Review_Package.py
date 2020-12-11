@@ -86,7 +86,7 @@ def runapp(TFL_Prepare_Review_Package):
                     arcpy.AddMessage('TFL folder has been copied to 3_TFL_Review folder')
                     try:
                         shutil.rmtree(input_folder)
-                        arcpy.AddMessage('TFL folder has been deleted from 2_TFL_Working folder')
+                        arcpy.AddMessage('TFL folder has been deleted from 2_TFL_Working folder\n')
                     except:
                         arcpy.AddWarning('WARNING: Unable to delete entire folder after copy - please check that review folder is complete then close all files and delete working folder')
                 except:
@@ -281,30 +281,30 @@ def save_changes_to_gdb(input_gdb,input_tfl,bcgw_connection):
     #Check the difference layers - if there are any differences notify the editor - otherwise - delete them
     #NOTE: this is pretty repetetive and should probably be within a function
     if int(arcpy.GetCount_management(bcgw_sched_a_diff)[0]) > 0:
-        arcpy.AddMessage('Saving Schedule A difference layer for BCGW to Final')
+        arcpy.AddMessage('Differences found between final Schedule A and BCGW Schedule A -- Saving difference layer')
     else:
-        arcpy.AddMessage('No differences found for Schedule A final to BCGW')
+        arcpy.AddMessage('No differences found between final Schedule A and BCGW Schedule A')
         arcpy.Delete_management(bcgw_sched_a_diff)
 
     if int(arcpy.GetCount_management(bcgw_boundary_diff)[0]) > 0:
-        arcpy.AddMessage('Saving Boundary difference layer for BCGW to Final')
+        arcpy.AddMessage('Differences found between final boundary and BCGW boundary -- Saving difference layer')
     else:
-        arcpy.AddMessage('No differences found for Boundary final to BCGW')
+        arcpy.AddMessage('No differences between final Boundary and BCGW boundary')
         arcpy.Delete_management(bcgw_boundary_diff)
 
     if int(arcpy.GetCount_management(final_sched_a_diff)[0]) > 0:
-        arcpy.AddMessage('Saving difference layer for schedule A')
+        arcpy.AddMessage('Difference found between working and final Schedule A -- Saving difference')
     else:
-        arcpy.AddMessage('No differences found for Schedule A')
+        arcpy.AddMessage('No differences found between working and final Schedule A')
         arcpy.Delete_management(final_sched_a_diff)
 
     if int(arcpy.GetCount_management(final_boundary_diff)[0]) > 0:
-        arcpy.AddMessage('Saving difference layer for boundary')
+        arcpy.AddMessage('Differences found between working and final boundary - Saving difference layer\n')
     else:
-        arcpy.AddMessage('No differences found for boundary')
+        arcpy.AddMessage('No differences found between working and final boundary\n')
         arcpy.Delete_management(final_boundary_diff)
 
-def difference_layer_check():
+def difference_layer_check(gdb_difference_layer):
     pass
 
 def create_review_map(inputgdb,input_tfl):
@@ -448,7 +448,7 @@ def get_coded_values(gdb, domain_name):
 def get_bcgw_connection(bcgw_uname, bcgw_pw):
 # SET UP BCGW CONNECTION -----------------------------------------------------------------
     arcpy.AddMessage(" ")
-    arcpy.AddMessage("Setting up the BCGW connection...")
+    arcpy.AddMessage("Setting up the BCGW connection...\n")
 
     # Run the  "BCGWConnectionFileModule.create" function which creates the BCGW
     # connection file and save the pathname to the variable "BCGWConnection"
