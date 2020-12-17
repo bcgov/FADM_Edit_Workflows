@@ -15,6 +15,7 @@ import time
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
+from utils import coded_domain_validation
 
 ###############################################################################
 # set constants (always upper case)
@@ -31,6 +32,7 @@ check_3 = arcpy.GetParameterAsText(3)
 
 input_folder = TFL_REVIEW_FOLDERS + os.sep + input_tfl
 input_gdb = input_folder + os.sep +'Data' + os.sep + 'FADM_' + input_tfl + '.gdb'
+workspace = os.path.join(input_gdb, 'TFL_Data')
 reviewed_timestamp = datetime.now()
 
 def runapp(tfl_set_to_pending):
@@ -53,36 +55,41 @@ def runapp(tfl_set_to_pending):
             arcpy.AddMessage('Check for locks after get editor: ' + str(lock_owner_list))
             if not user == edit_user:
 
-                #Remove the topologies
-                remove_topology(input_gdb)
-                arcpy.Compact_management(input_gdb)
-                lock_owner_list = gdb_object.check_for_locks()
-                arcpy.AddMessage('Check for locks after remove topology: ' + str(lock_owner_list))
-                #Remove TFL_Active_Lines FC
-                if arcpy.Exists(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines'):
-                    arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines')
-                #Set the reviewer
-                set_reviewer(user)
-                #Move the required entities to the pending area
-                arcpy.Compact_management(input_gdb) #compact to remove any self-locks
-                gdb_object = geobc.GDBInfo(input_gdb)
-                lock_owner_list = gdb_object.check_for_locks()
-                arcpy.AddMessage('Check for locks after setting reviewer ' + str(lock_owner_list))
-                arcpy.CompressFileGeodatabaseData_management(input_gdb) #compress gdb to prevent changes from here to final
-                if not lock_owner_list:
-                    try:
-                        shutil.copytree(input_folder,TFL_PENDING_FOLDERS + os.sep + input_tfl)
-                        #message user and end script
-                        arcpy.AddMessage('Copied - TFL folder to 4_TFL_Pending folder')
+                errors = coded_domain_validation.validate_domains(input_gdb, workspace)
+
+                if not errors:
+                    arcpy.AddMessage('\nNo attribute value errors found')
+
+                    #Remove the topologies
+                    remove_topology(input_gdb)
+                    arcpy.Compact_management(input_gdb)
+                    lock_owner_list = gdb_object.check_for_locks()
+                    arcpy.AddMessage('Check for locks after remove topology: ' + str(lock_owner_list))
+                    #Remove TFL_Active_Lines FC
+                    if arcpy.Exists(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines'):
+                        arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines')
+                    #Set the reviewer
+                    set_reviewer(user)
+                    #Move the required entities to the pending area
+                    arcpy.Compact_management(input_gdb) #compact to remove any self-locks
+                    gdb_object = geobc.GDBInfo(input_gdb)
+                    lock_owner_list = gdb_object.check_for_locks()
+                    arcpy.AddMessage('Check for locks after setting reviewer ' + str(lock_owner_list))
+                    arcpy.CompressFileGeodatabaseData_management(input_gdb) #compress gdb to prevent changes from here to final
+                    if not lock_owner_list:
                         try:
-                            shutil.rmtree(input_folder)
-                            arcpy.AddMessage('Deleted- TFL folder from 3_TFL_Review folder')
+                            shutil.copytree(input_folder,TFL_PENDING_FOLDERS + os.sep + input_tfl)
+                            #message user and end script
+                            arcpy.AddMessage('Copied - TFL folder to 4_TFL_Pending folder')
+                            try:
+                                shutil.rmtree(input_folder)
+                                arcpy.AddMessage('Deleted- TFL folder from 3_TFL_Review folder')
+                            except:
+                                arcpy.AddWarning('WARNING: Unable to delete entire folder after copy - please check that Pending folder is complete then close all files and delete Review folder')
                         except:
-                            arcpy.AddWarning('WARNING: Unable to delete entire folder after copy - please check that Pending folder is complete then close all files and delete Review folder')
-                    except:
-                        arcpy.AddWarning('WARNING: Unable to copy entire folder - please delete the folder and all contents in 3_TFL_Review. Then be sure all files are closed before trying again')
-                else:
-                    arcpy.AddWarning('Found lock on geodatabase: ' + str(lock_owner_list))
+                            arcpy.AddWarning('WARNING: Unable to copy entire folder - please delete the folder and all contents in 3_TFL_Review. Then be sure all files are closed before trying again')
+                    else:
+                        arcpy.AddWarning('Found lock on geodatabase: ' + str(lock_owner_list))
             else: #Message the user that the editor cannot review and promote the data
                 arcpy.AddWarning('Review cannot be completed by the same user that ran edit tools')
 
