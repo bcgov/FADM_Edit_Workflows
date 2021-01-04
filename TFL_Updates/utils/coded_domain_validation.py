@@ -4,7 +4,7 @@ import os
 import pandas as pd
 import numpy as np
 
-
+# This list can be updated to ignore certain fields. Change_type is currently being ignored because it is not used and will almost always contain domain errors
 IGNORE_FIELDS = ['CHANGE_TYPE']
 
 
