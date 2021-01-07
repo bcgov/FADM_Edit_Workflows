@@ -13,6 +13,7 @@
 import arcpy, sys, os, datetime, shutil, getpass
 from os.path import join
 from datetime import datetime
+from distutils.dir_util import copy_tree
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
@@ -47,6 +48,8 @@ def runapp(tfl_prepare_edits):
 
         #Copy the final folder to the Edit area
         can_copy = copy_input_tfl(folder_basename)
+        manage_keep_folder(folder_basename)
+
 
         #only proceed if the edit folder does not already exist and copy succeeded
         if can_copy == True:
@@ -93,22 +96,45 @@ def runapp(tfl_prepare_edits):
 ###############################################################################
 def copy_input_tfl(folder_basename):
     """ Takes input folder - creates folder structure and copies data from final folder returns Boolean True for success"""
-    if not os.path.exists(TFL_EDITS_FOLDER + os.sep + folder_basename):
+    tfl_edit_folder = join(TFL_EDITS_FOLDER, folder_basename)
+    tfl_final_folder = join(TFL_FINAL_FOLDER, folder_basename)
+
+    subdirs = os.listdir(tfl_final_folder)
+
+    if not os.path.exists(tfl_edit_folder):
         #create new edit folder and add all the folders except data (gets copied below)
-        arcpy.AddMessage('creating edit folder: '+ TFL_EDITS_FOLDER + os.sep + folder_basename)
-        os.mkdir(TFL_EDITS_FOLDER + os.sep + folder_basename)
-        os.mkdir(TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + 'arcgisprojects')
-        os.mkdir(TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + 'documents')
-        os.mkdir(TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + 'outputs')
-        os.mkdir(TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + 'data')
-        arcpy.Copy_management(input_tfl + os.sep + 'data' + os.sep + 'FADM_' + folder_basename + '.gdb', \
-        TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + 'data' + os.sep + 'FADM_' + folder_basename + '.gdb')
-##        shutil.copytree(input_tfl + os.sep + 'data',TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + 'data')
+        arcpy.AddMessage('Creating edit folder: ' + tfl_edit_folder)
+        os.mkdir(tfl_edit_folder)
+
+        for subdir in subdirs:
+            os.mkdir(join(tfl_edit_folder, subdir))
+
+
+        arcpy.Copy_management(join(input_tfl, 'data', 'FADM_' + folder_basename + '.gdb'), \
+                            join(TFL_EDITS_FOLDER, folder_basename, 'data', 'FADM_' + folder_basename + '.gdb'))
+
         arcpy.AddMessage('Completed copy from TFL Final\n')
-        return(True)
+        return True
     else:
         arcpy.AddError(folder_basename + ' already exits in 2_TFL_Edits Folder. Please review data within existing folder to ensure no-one else is working on TFL edits')
-        return(False)
+        return False
+
+
+def manage_keep_folder(folder_basename):
+    """
+    Written to manage the folder in 'documents' which contains any document relevant to the current TFL update
+    """
+    
+    update_support_dir = join(TFL_FINAL_FOLDER, folder_basename, 'documents', 'Update_Support_Documents')   # Dir containing relevant update documents in Final folder
+
+    edit_folder_documents_dir = join(TFL_EDITS_FOLDER, folder_basename, 'documents')    # Dir where we want to copy relevant documents to
+
+    if len(os.listdir(update_support_dir)) > 0:
+        copy_tree(update_support_dir, edit_folder_documents_dir)
+        arcpy.AddWarning('==== THERE ARE DOCUMENTS RELEVANT TO THIS UPDATE PRESENT, PLEASE CHECK DOCUMENTS FOLDER\n')
+    
+    shutil.rmtree(update_support_dir)   # delete the directory from the final folder, it shouldn't be archived
+
 
 def delete_tables(workspace):
     """Take edit workspace and delete all database tables that are not used as inputs (TFL Lines and Schedule A excepted)"""
