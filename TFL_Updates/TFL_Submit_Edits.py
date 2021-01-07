@@ -614,6 +614,8 @@ def move_and_archive():
     arcpy.AddMessage('Moved previous TFL folder to archive')
     #move the working folder to final
     shutil.move(input_folder,TFL_FINAL_FOLDERS + os.sep + input_tfl)
+    #recreate the Update_Support_Documents folder in Final
+    os.mkdir(os.path.join(TFL_FINAL_FOLDERS, input_tfl, 'documents', 'Update_Support_Documents'))
     arcpy.AddMessage('Moved package to TFL Final folder')
 
 #This section calls the other routines (def)
