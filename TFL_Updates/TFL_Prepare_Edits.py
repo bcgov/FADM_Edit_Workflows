@@ -48,11 +48,11 @@ def runapp(tfl_prepare_edits):
 
         #Copy the final folder to the Edit area
         can_copy = copy_input_tfl(folder_basename)
-        manage_keep_folder(folder_basename)
-
 
         #only proceed if the edit folder does not already exist and copy succeeded
         if can_copy == True:
+            manage_keep_folder(folder_basename)
+
 
             #uncompress the gdb - final is compressed to prevent accidental edits
             arcpy.UncompressFileGeodatabaseData_management(TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + \
