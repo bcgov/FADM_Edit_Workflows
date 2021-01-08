@@ -21,8 +21,11 @@ import ctypes
 ###############################################################################
 # set constants (always upper case)
 TFL_FINAL_FOLDER = TFL_Config.TFL_Path.FINAL_FOLDER
-TFL_TEMPLATES_GDB = TFL_Config.TFL_Path.TEMPLATES_GDB
 TFL_EDITS_FOLDER = TFL_Config.TFL_Path.EDITS_FOLDER
+TFL_REVIEW_FOLDER = TFL_Config.TFL_Path.REVIEW_FOLDERS
+TFL_PENDING_FOLDER = TFL_Config.TFL_Path.PENDING_FOLDERS
+
+TFL_TEMPLATES_GDB = TFL_Config.TFL_Path.TEMPLATES_GDB
 
 ###############################################################################
 # get script tool parameters
@@ -101,7 +104,9 @@ def copy_input_tfl(folder_basename):
 
     subdirs = os.listdir(tfl_final_folder)
 
-    if not os.path.exists(tfl_edit_folder):
+    # if not os.path.exists(tfl_edit_folder):
+    if not tfl_exists(folder_basename):
+
         #create new edit folder and add all the folders except data (gets copied below)
         arcpy.AddMessage('Creating edit folder: ' + tfl_edit_folder)
         os.mkdir(tfl_edit_folder)
@@ -116,7 +121,7 @@ def copy_input_tfl(folder_basename):
         arcpy.AddMessage('Completed copy from TFL Final\n')
         return True
     else:
-        arcpy.AddError(folder_basename + ' already exits in 2_TFL_Edits Folder. Please review data within existing folder to ensure no-one else is working on TFL edits')
+        # arcpy.AddError(folder_basename + ' already exits in 2_TFL_Edits Folder. Please review data within existing folder to ensure no-one else is working on TFL edits')
         return False
 
 
@@ -131,9 +136,24 @@ def manage_keep_folder(folder_basename):
 
     if len(os.listdir(update_support_dir)) > 0:
         copy_tree(update_support_dir, edit_folder_documents_dir)
-        arcpy.AddWarning('==== THERE ARE DOCUMENTS RELEVANT TO THIS UPDATE PRESENT, PLEASE CHECK DOCUMENTS FOLDER\n')
-    
-    shutil.rmtree(update_support_dir)   # delete the directory from the final folder, it shouldn't be archived
+        arcpy.AddWarning('==== THERE ARE DOCUMENTS RELEVANT TO THIS UPDATE, PLEASE CHECK DOCUMENTS FOLDER\n')
+
+
+def tfl_exists(folder_basename):
+    """
+    Checks to ensure that the TFL being loaded for edits is not present anywhere else in the update process
+    """
+
+    dirs_to_check = [TFL_EDITS_FOLDER, TFL_REVIEW_FOLDER, TFL_PENDING_FOLDER]
+
+    for dir in dirs_to_check:
+        tfls_being_updated = os.listdir(dir)
+        if folder_basename in tfls_being_updated:
+            arcpy.AddError('{} already exists in {}. You cannot start another update of {} while it is present \
+                            elsewhere in the update workflow'.format(folder_basename, (dir.split(os.sep))[-1], folder_basename))
+            return True
+
+    return False
 
 
 def delete_tables(workspace):
