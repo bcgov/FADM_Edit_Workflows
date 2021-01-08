@@ -607,6 +607,10 @@ def intersect_cadastre(bcgw_connection, datasets_to_update, check_out_date):
 def move_and_archive():
     now = datetime.now()
     timestamp = now.strftime("%Y%m%d")
+
+    update_support_dir = os.path.join(TFL_FINAL_FOLDERS, input_tfl, 'documents', 'Update_Support_Documents')   # Dir containing relevant update documents in Final folder
+    shutil.rmtree(update_support_dir)   # delete the directory from the final folder, it shouldn't be archived
+
     #move the previous final to archive
     shutil.move(TFL_FINAL_FOLDERS + os.sep + input_tfl,TFL_ARCHIVE + os.sep + input_tfl)
     #rename the previous TFL Folder by appending the timestamp
@@ -616,8 +620,6 @@ def move_and_archive():
     shutil.move(input_folder,TFL_FINAL_FOLDERS + os.sep + input_tfl)
 
     #recreate the Update_Support_Documents folder in Final
-    update_support_dir = os.path.join(TFL_FINAL_FOLDERS, input_tfl, 'documents', 'Update_Support_Documents')   # Dir containing relevant update documents in Final folder
-    shutil.rmtree(update_support_dir)   # delete the directory from the final folder, it shouldn't be archived
     os.mkdir(update_support_dir)
 
     arcpy.AddMessage('Moved package to TFL Final folder')
