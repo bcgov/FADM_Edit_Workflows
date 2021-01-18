@@ -14,7 +14,7 @@ TFL_Updates/test_helpers/
 **/config_files
 
 # ESRI toolboxes
-*.tbx
+# *.tbx
 **/toolboxes
 
 #PF_updates
