@@ -12,6 +12,7 @@ TFL_Updates/test_helpers/
 
 #config_folder
 **/config_files
+config/
 
 # ESRI toolboxes
 # *.tbx
