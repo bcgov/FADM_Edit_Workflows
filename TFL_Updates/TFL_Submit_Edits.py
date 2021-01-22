@@ -20,10 +20,16 @@ import geobc
 ###############################################################################
 # set constants (always upper case)
 # constants for file and folder locations (local gdb, staging gdb)
-TFL_STAGING_FOLDER = TFL_Config.TFL_Path.STAGING
-TFL_PENDING_FOLDERS = TFL_Config.TFL_Path.PENDING_FOLDERS
-TFL_FINAL_FOLDERS = TFL_Config.TFL_Path.FINAL_FOLDER
-TFL_ARCHIVE = TFL_Config.TFL_Path.ARCHIVE
+working_location = os.path.abspath(__file__)
+test = False
+if 'test' in working_location.lower():
+    test = True
+TFL_Path = TFL_Config.TFL_Path(test=test)
+
+TFL_STAGING_FOLDER = TFL_Path.STAGING
+TFL_PENDING_FOLDERS = TFL_Path.PENDING_FOLDERS
+TFL_FINAL_FOLDERS = TFL_Path.FINAL_FOLDER
+TFL_ARCHIVE = TFL_Path.ARCHIVE
 ICF = r'\\WHSE_CADASTRE.CBM_INTGD_CADASTRAL_FABRIC_SVW'
 PMBC = r'\\WHSE_CADASTRE.PMBC_PARCEL_FABRIC_POLY_SVW'
 TANTALIS = r'\\WHSE_TANTALIS.TA_SURVEY_PARCELS_SVW'

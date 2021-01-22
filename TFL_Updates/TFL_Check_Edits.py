@@ -18,7 +18,13 @@ import geobc
 
 ###############################################################################
 # set constants (always upper case)
-TFL_EDITS_FOLDER = TFL_Config.TFL_Path.EDITS_FOLDER
+working_location = os.path.abspath(__file__)
+test = False
+if 'test' in working_location.lower():
+    test = True
+TFL_Path = TFL_Config.TFL_Path(test=test)
+
+TFL_EDITS_FOLDER = TFL_Path.EDITS_FOLDER
 
 ###############################################################################
 # get script tool parameters

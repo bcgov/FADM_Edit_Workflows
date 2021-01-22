@@ -20,8 +20,14 @@ from utils import coded_domain_validation
 ###############################################################################
 # set constants (always upper case)
 # constants for file and folder locations
-TFL_REVIEW_FOLDERS = TFL_Config.TFL_Path.REVIEW_FOLDERS
-TFL_PENDING_FOLDERS = TFL_Config.TFL_Path.PENDING_FOLDERS
+working_location = os.path.abspath(__file__)
+test = False
+if 'test' in working_location.lower():
+    test = True
+TFL_Path = TFL_Config.TFL_Path(test=test)
+
+TFL_REVIEW_FOLDERS = TFL_Path.REVIEW_FOLDERS
+TFL_PENDING_FOLDERS = TFL_Path.PENDING_FOLDERS
 
 ###############################################################################
 # get script tool parameters

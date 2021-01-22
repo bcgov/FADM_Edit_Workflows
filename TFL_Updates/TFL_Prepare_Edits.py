@@ -17,15 +17,22 @@ from distutils.dir_util import copy_tree
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
-import ctypes
+
+
 ###############################################################################
 # set constants (always upper case)
-TFL_FINAL_FOLDER = TFL_Config.TFL_Path.FINAL_FOLDER
-TFL_EDITS_FOLDER = TFL_Config.TFL_Path.EDITS_FOLDER
-TFL_REVIEW_FOLDER = TFL_Config.TFL_Path.REVIEW_FOLDERS
-TFL_PENDING_FOLDER = TFL_Config.TFL_Path.PENDING_FOLDERS
+working_location = os.path.abspath(__file__)
+test = False
+if 'test' in working_location.lower():
+    test = True
+TFL_Path = TFL_Config.TFL_Path(test=test)
 
-TFL_TEMPLATES_GDB = TFL_Config.TFL_Path.TEMPLATES_GDB
+TFL_FINAL_FOLDER = TFL_Path.FINAL_FOLDER
+TFL_EDITS_FOLDER = TFL_Path.EDITS_FOLDER
+TFL_REVIEW_FOLDER = TFL_Path.REVIEW_FOLDERS
+TFL_PENDING_FOLDER = TFL_Path.PENDING_FOLDERS
+
+TFL_TEMPLATES_GDB = TFL_Path.TEMPLATES_GDB
 
 ###############################################################################
 # get script tool parameters

@@ -20,10 +20,16 @@ import geobc
 
 ###############################################################################
 # constants for file and folder locations
-TFL_REVIEW_FOLDERS = TFL_Config.TFL_Path.REVIEW_FOLDERS
-TFL_WORKING_FOLDERS = TFL_Config.TFL_Path.EDITS_FOLDER
-TFL_FINAL_FOLDERS = TFL_Config.TFL_Path.FINAL_FOLDER
-TFL_TEMPLATE_MAP = TFL_Config.TFL_Path.TEMPLATE_MAP
+working_location = os.path.abspath(__file__)
+test = False
+if 'test' in working_location.lower():
+    test = True
+TFL_Path = TFL_Config.TFL_Path(test=test)
+
+TFL_REVIEW_FOLDERS = TFL_Path.REVIEW_FOLDERS
+TFL_WORKING_FOLDERS = TFL_Path.EDITS_FOLDER
+TFL_FINAL_FOLDERS = TFL_Path.FINAL_FOLDER
+TFL_TEMPLATE_MAP = TFL_Path.TEMPLATE_MAP
 
 ###############################################################################
 # get script tool parameters
