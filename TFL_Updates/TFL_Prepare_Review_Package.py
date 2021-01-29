@@ -16,14 +16,14 @@ from datetime import datetime
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
+from utils.test_prod_check import test_in_working_dir
 
 
 ###############################################################################
 # constants for file and folder locations
 working_location = os.path.abspath(__file__)
-test = False
-if 'test' in working_location.lower():
-    test = True
+test = test_in_working_dir(working_location)
+
 TFL_Path = TFL_Config.TFL_Path(test=test)
 
 TFL_REVIEW_FOLDERS = TFL_Path.REVIEW_FOLDERS
