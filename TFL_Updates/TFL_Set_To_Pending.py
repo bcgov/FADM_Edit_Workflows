@@ -32,10 +32,10 @@ TFL_PENDING_FOLDERS = TFL_Path.PENDING_FOLDERS
 
 ###############################################################################
 # get script tool parameters
-input_tfl = arcpy.GetParameterAsText(0) #Folder containing the TFL review package
-check_1 = arcpy.GetParameterAsText(1)
-check_2 = arcpy.GetParameterAsText(2)
-check_3 = arcpy.GetParameterAsText(3)
+input_tfl = arcpy.GetParameterAsText(1) #Folder containing the TFL review package
+check_1 = arcpy.GetParameterAsText(2)
+check_2 = arcpy.GetParameterAsText(3)
+check_3 = arcpy.GetParameterAsText(4)
 
 input_folder = TFL_REVIEW_FOLDERS + os.sep + input_tfl
 input_gdb = input_folder + os.sep +'Data' + os.sep + 'FADM_' + input_tfl + '.gdb'

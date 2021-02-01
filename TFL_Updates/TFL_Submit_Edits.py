@@ -36,16 +36,16 @@ TANTALIS = r'\\WHSE_TANTALIS.TA_SURVEY_PARCELS_SVW'
 
 ###############################################################################
 # get script tool parameters
-input_tfl = arcpy.GetParameterAsText(0) #TFL name of folder containing the TFL review package
-bcgw_uname = arcpy.GetParameterAsText(1)
-bcgw_pw = arcpy.GetParameterAsText(2)
-date_confirmation = arcpy.GetParameterAsText(3)
-effective_date = arcpy.GetParameterAsText(4)
-legislative_tool = arcpy.GetParameterAsText(5)
-instrument_number = arcpy.GetParameterAsText(6)
-tfl_component = arcpy.GetParameterAsText(7)
-multi_instrument_confirmation = arcpy.GetParameterAsText(8)
-change_type = arcpy.GetParameterAsText(9)
+input_tfl = arcpy.GetParameterAsText(1) #TFL name of folder containing the TFL review package
+bcgw_uname = arcpy.GetParameterAsText(2)
+bcgw_pw = arcpy.GetParameterAsText(3)
+date_confirmation = arcpy.GetParameterAsText(4)
+effective_date = arcpy.GetParameterAsText(5)
+legislative_tool = arcpy.GetParameterAsText(6)
+instrument_number = arcpy.GetParameterAsText(7)
+tfl_component = arcpy.GetParameterAsText(8)
+multi_instrument_confirmation = arcpy.GetParameterAsText(9)
+change_type = arcpy.GetParameterAsText(10)
 
 input_folder = TFL_PENDING_FOLDERS + os.sep + input_tfl
 input_gdb = input_folder + os.sep +'Data' + os.sep + 'FADM_' + input_tfl + '.gdb'

@@ -33,11 +33,11 @@ TFL_TEMPLATE_MAP = TFL_Path.TEMPLATE_MAP
 
 ###############################################################################
 # get script tool parameters
-input_tfl = arcpy.GetParameterAsText(0) #Folder containing the TFL line edits
-bcgw_uname = arcpy.GetParameterAsText(1)
-bcgw_pw = arcpy.GetParameterAsText(2)
-change_description = arcpy.GetParameterAsText(3) #Text input - short statement of the nature of the change
-change_summary = arcpy.GetParameterAsText(4) #Text input - short paragraph (or less) with detail as required
+input_tfl = arcpy.GetParameterAsText(1) #Folder containing the TFL line edits
+bcgw_uname = arcpy.GetParameterAsText(2)
+bcgw_pw = arcpy.GetParameterAsText(3)
+change_description = arcpy.GetParameterAsText(4) #Text input - short statement of the nature of the change
+change_summary = arcpy.GetParameterAsText(5) #Text input - short paragraph (or less) with detail as required
 
 # Global path variables used throughout
 input_folder = join(TFL_WORKING_FOLDERS, input_tfl)

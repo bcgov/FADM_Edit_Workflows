@@ -36,10 +36,10 @@ TFL_TEMPLATES_GDB = TFL_Path.TEMPLATES_GDB
 
 ###############################################################################
 # get script tool parameters
-input_tfl = arcpy.GetParameterAsText(0) #Folder containing the final TFL data for editing
+input_tfl = arcpy.GetParameterAsText(1) #Folder containing the final TFL data for editing
 input_tfl = TFL_FINAL_FOLDER + os.sep + input_tfl #combine the input folder name with the base folder to get full path
-bcgw_uname = arcpy.GetParameterAsText(1)
-bcgw_pw = arcpy.GetParameterAsText(2)
+bcgw_uname = arcpy.GetParameterAsText(2)
+bcgw_pw = arcpy.GetParameterAsText(3)
 
 #determine TFL basename from the input folder
 folder_basename = (input_tfl.split(os.sep)[-1])[0:6]

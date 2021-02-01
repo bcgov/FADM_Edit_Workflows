@@ -28,9 +28,9 @@ TFL_EDITS_FOLDER = TFL_Path.EDITS_FOLDER
 
 ###############################################################################
 # get script tool parameters
-input_folder = arcpy.GetParameterAsText(0) #Folder containing the TFL line edits
-bcgw_uname = arcpy.GetParameterAsText(1)
-bcgw_pw = arcpy.GetParameterAsText(2)
+input_folder = arcpy.GetParameterAsText(1) #Folder containing the TFL line edits
+bcgw_uname = arcpy.GetParameterAsText(2)
+bcgw_pw = arcpy.GetParameterAsText(3)
 input_gdb = TFL_EDITS_FOLDER + os.sep + input_folder + os.sep + 'data' + os.sep + 'FADM_' + input_folder + '.gdb'
 
 tfl_basename = input_folder
