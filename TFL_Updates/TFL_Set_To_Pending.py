@@ -56,6 +56,9 @@ def runapp(tfl_set_to_pending):
 
             #Check to ensure the reviewer running the tool is not the user who extracted the TFL (assumed to be the editor)
             user = getpass.getuser()
+            if test:
+                user = 'Test_Username'
+
             edit_user = get_editor()
             arcpy.Compact_management(input_gdb)
             lock_owner_list = gdb_object.check_for_locks()
