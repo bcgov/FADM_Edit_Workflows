@@ -29,8 +29,8 @@ TFL_PENDING_FOLDERS = TFL_Path.PENDING_FOLDERS
 
 ###############################################################################
 # get script tool parameters
-input_main_folder = arcpy.GetParameterAsText(0) #Main folder (either Review or Pending)
-input_tfl = arcpy.GetParameterAsText(1) #Folder containing the TFL package
+input_main_folder = arcpy.GetParameterAsText(1) #Main folder (either Review or Pending)
+input_tfl = arcpy.GetParameterAsText(2) #Folder containing the TFL package
 
 def runapp(move_to_working):
 
