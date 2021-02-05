@@ -91,14 +91,15 @@ def create_topology(workspace, tfl_lines):
     workspace is the feature dataset"""
     arcpy.env.workspace = workspace
     topology = workspace + os.sep + 'TFL_Active_Line_Topology'
+    active_lines = workspace + os.sep + 'TFL_Active_Lines__do_not_edit'
     if arcpy.Exists(topology):
         arcpy.Delete_management(topology)
     #make feature layer of active lines
-    if arcpy.Exists(workspace + os.sep + 'TFL_Active_Lines'):
-        arcpy.Delete_management(workspace + os.sep + 'TFL_Active_Lines')
+    if arcpy.Exists(active_lines):
+        arcpy.Delete_management(active_lines)
     tfl_active_lines_layer = arcpy.MakeFeatureLayer_management(tfl_lines, 'tfl_active_lines_layer', "Status_Code IN ('ACTIVE')")
-    arcpy.CopyFeatures_management('tfl_active_lines_layer', workspace + os.sep + 'TFL_Active_Lines')
-    feature_class = workspace + os.sep + 'TFL_Active_Lines'
+    arcpy.CopyFeatures_management('tfl_active_lines_layer', active_lines)
+    feature_class = active_lines
     del tfl_active_lines_layer
 
     try:

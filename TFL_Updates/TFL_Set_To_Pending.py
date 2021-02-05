@@ -76,8 +76,8 @@ def runapp(tfl_set_to_pending):
                     lock_owner_list = gdb_object.check_for_locks()
                     arcpy.AddMessage('Check for locks after remove topology: ' + str(lock_owner_list))
                     #Remove TFL_Active_Lines FC
-                    if arcpy.Exists(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines'):
-                        arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines')
+                    if arcpy.Exists(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines__do_not_edit'):
+                        arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines__do_not_edit')
                     #Set the reviewer
                     set_reviewer(user)
                     #Move the required entities to the pending area
