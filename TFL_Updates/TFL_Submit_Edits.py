@@ -615,7 +615,8 @@ def move_and_archive():
     timestamp = now.strftime("%Y%m%d")
 
     update_support_dir = os.path.join(TFL_FINAL_FOLDERS, input_tfl, 'documents', 'Update_Support_Documents')   # Dir containing relevant update documents in Final folder
-    shutil.rmtree(update_support_dir)   # delete the directory from the final folder, it shouldn't be archived
+    if os.path.isdir(update_support_dir):
+        shutil.rmtree(update_support_dir)   # delete the directory from the final folder, it shouldn't be archived
 
     #move the previous final to archive
     shutil.move(TFL_FINAL_FOLDERS + os.sep + input_tfl,TFL_ARCHIVE + os.sep + input_tfl)
