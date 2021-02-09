@@ -46,7 +46,7 @@ def runapp(tfl_set_to_pending):
 
     #Confirm that user marked all checks as complete
     if check_1 and check_2 and check_3:
-
+        
         arcpy.AddMessage('dataset to move is ' + input_gdb)
 
         # Call check_for_locks method to check the gdb
@@ -71,13 +71,11 @@ def runapp(tfl_set_to_pending):
                     arcpy.AddMessage('\nNo attribute value errors found')
 
                     #Remove the topologies
-                    remove_topology(input_gdb)
+                    remove_topology_and_active_lines(workspace)
                     arcpy.Compact_management(input_gdb)
                     lock_owner_list = gdb_object.check_for_locks()
                     arcpy.AddMessage('Check for locks after remove topology: ' + str(lock_owner_list))
-                    #Remove TFL_Active_Lines FC
-                    if arcpy.Exists(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines__do_not_edit'):
-                        arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Lines__do_not_edit')
+
                     #Set the reviewer
                     set_reviewer(user)
                     #Move the required entities to the pending area
@@ -111,14 +109,18 @@ def runapp(tfl_set_to_pending):
 ###############################################################################
 ## Functions section
 ###############################################################################
-def remove_topology(input_gdb):
+def remove_topology_and_active_lines(workspace):
     """Removes topology from the database"""
-    if arcpy.Exists(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Line_Topology'):
-        arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Line_Topology')
-        arcpy.AddMessage('Deleted TFL_Line_Topology')
-    if arcpy.Exists(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Line_Topology'):
-        arcpy.Delete_management(input_gdb + os.sep + 'TFL_Data' + os.sep + 'TFL_Active_Line_Topology')
-        arcpy.AddMessage('Deleted TFL_Active_Line_Topology')
+    arcpy.env.workspace = workspace
+
+    for fc in arcpy.ListDatasets():
+        if 'Topology' in fc:
+            arcpy.Delete_management(fc)
+
+    for fc in arcpy.ListFeatureClasses():
+        if fc.startswith('TFL_Active_Lines'):
+            arcpy.Delete_management(fc)
+  
 
 def get_editor():
     """takes input gdb and tfl name, and finds the user for the check edits
