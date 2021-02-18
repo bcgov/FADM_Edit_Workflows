@@ -13,6 +13,7 @@
 import arcpy, sys, os, datetime, shutil, getpass
 from os.path import join
 from datetime import datetime
+import logging
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
@@ -32,6 +33,10 @@ TFL_FINAL_FOLDERS = TFL_Path.FINAL_FOLDER
 TFL_TEMPLATE_MAP = TFL_Path.TEMPLATE_MAP
 
 ###############################################################################
+# set up basic logging config
+log_file = os.path.join(os.path.dirname(working_location), 'tool_errors.log')
+logging.basicConfig(filename=log_file, level=logging.ERROR, format='%(asctime)s:%(levelname)-8s [%(filename)s:%(lineno)d] %(message)s')
+
 # get script tool parameters
 input_tfl = arcpy.GetParameterAsText(1) #Folder containing the TFL line edits
 bcgw_uname = arcpy.GetParameterAsText(2)
@@ -87,16 +92,21 @@ def runapp(TFL_Prepare_Review_Package):
 
                 #Move folder to review area
                 try:
-                    shutil.copytree(input_folder,TFL_REVIEW_FOLDERS + os.sep + input_tfl)
+                    arcpy.Copy_management(input_folder, TFL_REVIEW_FOLDERS + os.sep + input_tfl)
+                    arcpy.Compact_management(os.path.join(TFL_REVIEW_FOLDERS, input_tfl, 'Data', 'FADM_' + input_tfl + '.gdb'))
+
+                    # copy_data(input_tfl, TFL_REVIEW_FOLDERS)
                     #message user and end script
                     arcpy.AddMessage('TFL folder has been copied to 3_TFL_Review folder')
                     try:
+                        arcpy.Compact_management(input_gdb)
                         shutil.rmtree(input_folder)
                         arcpy.AddMessage('TFL folder has been deleted from 2_TFL_Working folder\n')
-                    except:
-                        arcpy.AddWarning('WARNING: Unable to delete entire folder after copy - please check that review folder is complete then close all files and delete working folder')
+                    except Exception as e:
+                        arcpy.AddWarning('== WARNING == Unable to delete entire folder after copy - please check that review folder is complete then close all files and delete working folder')
+                        logging.error(e)
                 except:
-                    arcpy.AddWarning('WARNING: Unable to copy entire folder - please delete the folder and all contents in 3_TFL_Review. Then be sure all files are closed before trying again')
+                    arcpy.AddWarning('== WARNING ==: Unable to copy entire folder - please delete the folder and all contents in 3_TFL_Review. Then be sure all files are closed before trying again')
 
                 #IAN - add email to reviewers + cc to editor
         else:
@@ -310,6 +320,7 @@ def save_changes_to_gdb(input_gdb,input_tfl,bcgw_connection):
         arcpy.AddMessage('No differences found between working and final boundary\n')
         arcpy.Delete_management(final_boundary_diff)
 
+
 def difference_layer_check(gdb_difference_layer):
     pass
 
@@ -375,6 +386,7 @@ def check_schedule_a_is_within(tfl_basename, input_gdb):
         arcpy.AddMessage('Schedule A is all within the boundary')
         arcpy.Delete_management(schedule_a_outside)
         return(True)
+  
 
 def get_timber_licences(tfl_poly, input_gdb, BCGW_Connection):
     """Used only when change is replacement. Takes the TFL Poly and finds all
@@ -407,6 +419,7 @@ def get_timber_licences(tfl_poly, input_gdb, BCGW_Connection):
     arcpy.Delete_management(timber_licence_fl)
 
 
+
 def create_update_readme(input_folder,input_tfl, input_gdb):
     """Takes the input Change Description and Change Summary text and creates a readme
     file in the working directory. Overwrites if there is one already.
@@ -437,6 +450,7 @@ def create_update_readme(input_folder,input_tfl, input_gdb):
             cursor.updateRow(row)
         del row
     del cursor
+
 
 def get_coded_values(gdb, domain_name):
     """takes a gdb object and a string of a domain name, returns a list of domain values.

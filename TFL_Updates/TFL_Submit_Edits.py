@@ -12,6 +12,7 @@
 # Import modules
 import arcpy, sys, os, datetime, getpass, shutil
 from datetime import datetime
+import logging
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
@@ -19,6 +20,8 @@ from utils.test_prod_check import test_in_working_dir
 
 
 ###############################################################################
+
+
 # set constants (always upper case)
 # constants for file and folder locations (local gdb, staging gdb)
 working_location = os.path.abspath(__file__)
@@ -33,6 +36,10 @@ TFL_ARCHIVE = TFL_Path.ARCHIVE
 ICF = r'\\WHSE_CADASTRE.CBM_INTGD_CADASTRAL_FABRIC_SVW'
 PMBC = r'\\WHSE_CADASTRE.PMBC_PARCEL_FABRIC_POLY_SVW'
 TANTALIS = r'\\WHSE_TANTALIS.TA_SURVEY_PARCELS_SVW'
+###################################################################################
+# set up basic logging config
+log_file = os.path.join(os.path.dirname(working_location), 'tool_errors.log')
+logging.basicConfig(filename=log_file, level=logging.ERROR, format='%(asctime)s:%(levelname)-8s [%(filename)s:%(lineno)d] %(message)s')
 
 ###############################################################################
 # get script tool parameters
@@ -610,25 +617,38 @@ def intersect_cadastre(bcgw_connection, datasets_to_update, check_out_date):
 
     arcpy.Delete_management(lines_fl)
 
+
 def move_and_archive():
+    arcpy.env.workspace = working_location
+
     now = datetime.now()
-    timestamp = now.strftime("%Y%m%d")
+    date = now.strftime("%Y%m%d")
 
     update_support_dir = os.path.join(TFL_FINAL_FOLDERS, input_tfl, 'documents', 'Update_Support_Documents')   # Dir containing relevant update documents in Final folder
     if os.path.isdir(update_support_dir):
         shutil.rmtree(update_support_dir)   # delete the directory from the final folder, it shouldn't be archived
 
     #move the previous final to archive
-    shutil.move(TFL_FINAL_FOLDERS + os.sep + input_tfl,TFL_ARCHIVE + os.sep + input_tfl)
-    #rename the previous TFL Folder by appending the timestamp
-    os.rename(TFL_ARCHIVE + os.sep + input_tfl,TFL_ARCHIVE + os.sep + input_tfl + '_' + timestamp)
+    shutil.move(TFL_FINAL_FOLDERS + os.sep + input_tfl, TFL_ARCHIVE + os.sep + input_tfl + '_' + date)
     arcpy.AddMessage('Moved previous TFL folder to archive')
-    #move the working folder to final
-    shutil.move(input_folder,TFL_FINAL_FOLDERS + os.sep + input_tfl)
+
+    #copy the working folder to final
+    arcpy.Copy_management(input_folder, TFL_FINAL_FOLDERS + os.sep + input_tfl)
+    arcpy.Compact_management(os.path.join(TFL_FINAL_FOLDERS, input_tfl, 'Data', 'FADM_' + input_tfl + '.gdb'))      # there may be leftover locks, compacting seems to get rid of them in this situation
+    # shutil.copytree(input_folder, TFL_FINAL_FOLDERS + os.sep + input_tfl, ignore=shutil.ignore_patterns('*.lock'))    #alternative workaround for lock issues
+    arcpy.AddMessage('Moved package to TFL Final folder')
+
     #recreate the Update_Support_Documents folder in Final
     os.mkdir(update_support_dir)
 
-    arcpy.AddMessage('Moved package to TFL Final folder')
+    # attempt to delete the working folder from Pending
+    try:
+        arcpy.Compact_management(input_gdb)
+        shutil.rmtree(input_folder)
+    except Exception as e:
+        arcpy.AddWarning('\n== ACTION REQUIRED == {} could not be deleted from the Pending folder. Please be sure to manually delete it'.format(input_tfl))
+        logging.error(e)
+
 
 #This section calls the other routines (def)
 if __name__ == '__main__':
