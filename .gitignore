@@ -20,3 +20,6 @@ config/
 
 #PF_updates
 /PF_Updates
+
+#logging_file
+tool_errors.log
