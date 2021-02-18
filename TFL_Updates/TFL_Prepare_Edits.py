@@ -156,8 +156,7 @@ def tfl_exists(folder_basename):
     for dir in dirs_to_check:
         tfls_being_updated = os.listdir(dir)
         if folder_basename in tfls_being_updated:
-            arcpy.AddError('{} already exists in {}. You cannot start another update of {} while it is present \
-                            elsewhere in the update workflow'.format(folder_basename, (dir.split(os.sep))[-1], folder_basename))
+            arcpy.AddError('{} already exists in {}. You cannot start another update of {} while it is present elsewhere in the update workflow'.format(folder_basename, (dir.split(os.sep))[-1], folder_basename))
             return True
 
     return False
