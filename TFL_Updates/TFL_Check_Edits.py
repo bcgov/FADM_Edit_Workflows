@@ -11,6 +11,7 @@
 # Import modules
 import arcpy, sys, os, datetime, getpass
 from datetime import datetime
+import re
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
@@ -31,10 +32,10 @@ TFL_EDITS_FOLDER = TFL_Path.EDITS_FOLDER
 input_folder = arcpy.GetParameterAsText(1) #Folder containing the TFL line edits
 bcgw_uname = arcpy.GetParameterAsText(2)
 bcgw_pw = arcpy.GetParameterAsText(3)
-input_gdb = TFL_EDITS_FOLDER + os.sep + input_folder + os.sep + 'data' + os.sep + 'FADM_' + input_folder + '.gdb'
+tfl_number = re.search("^TFL_[0-9]+", input_folder).group()
+input_gdb = TFL_EDITS_FOLDER + os.sep + input_folder + os.sep + 'data' + os.sep + 'FADM_' + tfl_number + '.gdb'
 
-tfl_basename = input_folder
-tfl_lines = input_gdb + os.sep + 'TFL_Data' + os.sep + tfl_basename + '_Line'
+tfl_lines = input_gdb + os.sep + 'TFL_Data' + os.sep + tfl_number + '_Line'
 
 def runapp(tfl_check_edits):
 
@@ -55,27 +56,27 @@ def runapp(tfl_check_edits):
             attributes_result = check_line_attributes(tfl_lines, domain_list)
 
             #Convert lines to polygons using TFL lines - inform if build fails
-            build_result = create_polys(input_gdb,tfl_lines,tfl_basename)
+            build_result = create_polys(input_gdb,tfl_lines,tfl_number)
 
             #The next two checks use the TFL boundary - only run them if the polygons built
             if build_result is True:
 
                 #Check that the new TFL Boundary does not overlap with any other TFL
                 #This is a soft rule that will not prevent submission as there may be multiple overlaps
-                tfl_overlap_result = check_tfl_overlaps(tfl_basename,input_gdb,BCGWConnection)
+                tfl_overlap_result = check_tfl_overlaps(tfl_number,input_gdb,BCGWConnection)
 
                 #Check to see if there are any schedule A polygons NOT within the Schedule B - warn if found
-                schedule_a_within_result = check_schedule_a_is_within(tfl_basename,input_gdb)
+                schedule_a_within_result = check_schedule_a_is_within(tfl_number,input_gdb)
 
             #track completion of this stage in transaction details table
             if topology_result is True and attributes_result is True and build_result is True:
                 #Mark as passed and update table
-                update_transaction_details(input_gdb,tfl_basename,"Yes")
+                update_transaction_details(input_gdb,tfl_number,"Yes")
                 arcpy.AddMessage('\nScript completed with no errors - data can proceed to review stage when ready.\n \
                 Any changes to data will require this script to be re-run')
             else:
                 #Mark as failed
-                update_transaction_details(input_gdb,tfl_basename,"No")
+                update_transaction_details(input_gdb,tfl_number,"No")
                 arcpy.AddWarning('\nScript completed with errors found - please review the error messages and \
                 correct before re-running test')
 

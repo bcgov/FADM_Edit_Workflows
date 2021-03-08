@@ -8,10 +8,10 @@
 ###############################################################################
 
 # Import modules
-import arcpy, sys, os, shutil
+import arcpy, sys, os, shutil, re
+import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
-import TFL_Config
 from utils.test_prod_check import test_in_working_dir
 
 
@@ -31,6 +31,7 @@ TFL_PENDING_FOLDERS = TFL_Path.PENDING_FOLDERS
 # get script tool parameters
 input_main_folder = arcpy.GetParameterAsText(1) #Main folder (either Review or Pending)
 input_tfl = arcpy.GetParameterAsText(2) #Folder containing the TFL package
+tfl_number = re.search("^TFL_[0-9]+", input_tfl).group()
 
 def runapp(move_to_working):
 
@@ -39,7 +40,7 @@ def runapp(move_to_working):
     else:
         input_folder = TFL_PENDING_FOLDERS + os.sep + input_tfl
 
-    input_gdb = input_folder + os.sep +'Data' + os.sep + 'FADM_' + input_tfl + '.gdb'
+    input_gdb = input_folder + os.sep +'Data' + os.sep + 'FADM_' + tfl_number + '.gdb'
 
     arcpy.AddMessage('input folder to move is: ' + input_folder)
 

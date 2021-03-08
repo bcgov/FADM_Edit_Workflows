@@ -14,6 +14,7 @@ import arcpy, sys, os, datetime, shutil, getpass
 from os.path import join
 from datetime import datetime
 import logging
+import re
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
@@ -46,9 +47,10 @@ change_summary = arcpy.GetParameterAsText(5) #Text input - short paragraph (or l
 
 # Global path variables used throughout
 input_folder = join(TFL_WORKING_FOLDERS, input_tfl)
-input_gdb = join(input_folder, 'Data', 'FADM_' + input_tfl + '.gdb')
-current_tfl_layer_name = join(input_gdb, 'TFL_Data', input_tfl)
-final_tfl_layer_name = join(TFL_FINAL_FOLDERS, input_tfl, 'data', 'FADM_' + input_tfl + '.gdb', 'TFL_Data', input_tfl)
+tfl_number = re.search("^TFL_[0-9]+", input_tfl).group()
+input_gdb = join(input_folder, 'Data', 'FADM_' + tfl_number + '.gdb')
+current_tfl_layer_name = join(input_gdb, 'TFL_Data', tfl_number)
+final_tfl_layer_name = join(TFL_FINAL_FOLDERS, tfl_number, 'data', 'FADM_' + tfl_number + '.gdb', 'TFL_Data', tfl_number)
 
 
 def runapp(TFL_Prepare_Review_Package):
@@ -75,25 +77,25 @@ def runapp(TFL_Prepare_Review_Package):
         if BCGWConnection: #only proceed if connection succeeds -
 
             #check to ensure data has passed the check edits stage and no edits have been made since
-            check_ready = check_prerequisites(input_gdb,input_tfl, BCGWConnection)
+            check_ready = check_prerequisites(input_gdb, tfl_number, BCGWConnection)
 
             if check_ready is False:
                 arcpy.AddWarning('ERROR: Review messages and resolve before running tool')
             else:
 
                 #Add changes (if any) to the working database
-                save_changes_to_gdb(input_gdb,input_tfl,BCGWConnection)
+                save_changes_to_gdb(input_gdb, tfl_number, BCGWConnection)
 
                 #Add the review map template to the review folder and path it
-                create_review_map(input_gdb,input_tfl)
+                create_review_map(input_gdb, tfl_number)
 
                 #Create the draft change summary and add it to the folder - or Update if already there
-                create_update_readme(input_folder,input_tfl,input_gdb)
+                create_update_readme(input_folder, tfl_number,input_gdb)
 
                 #Move folder to review area
                 try:
                     arcpy.Copy_management(input_folder, TFL_REVIEW_FOLDERS + os.sep + input_tfl)
-                    arcpy.Compact_management(os.path.join(TFL_REVIEW_FOLDERS, input_tfl, 'Data', 'FADM_' + input_tfl + '.gdb'))
+                    arcpy.Compact_management(os.path.join(TFL_REVIEW_FOLDERS, input_tfl, 'Data', 'FADM_' + tfl_number + '.gdb'))
 
                     # copy_data(input_tfl, TFL_REVIEW_FOLDERS)
                     #message user and end script

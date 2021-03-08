@@ -12,6 +12,7 @@
 import arcpy, sys, os, datetime, getpass, shutil
 from datetime import datetime
 import time
+import re
 import TFL_Config
 sys.path.append(TFL_Config.Resources.GEOBC_LIBRARY_PATH)
 import geobc
@@ -38,7 +39,8 @@ check_2 = arcpy.GetParameterAsText(3)
 check_3 = arcpy.GetParameterAsText(4)
 
 input_folder = TFL_REVIEW_FOLDERS + os.sep + input_tfl
-input_gdb = input_folder + os.sep +'Data' + os.sep + 'FADM_' + input_tfl + '.gdb'
+tfl_number = re.search("^TFL_[0-9]+", input_tfl).group()
+input_gdb = input_folder + os.sep + 'Data' + os.sep + 'FADM_' + tfl_number + '.gdb'
 workspace = os.path.join(input_gdb, 'TFL_Data')
 reviewed_timestamp = datetime.now()
 
@@ -125,7 +127,7 @@ def remove_topology_and_active_lines(workspace):
 def get_editor():
     """takes input gdb and tfl name, and finds the user for the check edits
         note that this table should only ever have a single record"""
-    table = input_gdb + os.sep + input_tfl + '_Transaction_Details'
+    table = input_gdb + os.sep + tfl_number + '_Transaction_Details'
     fields = ['Edits_Checked_By']
     edit_user = ''
     with arcpy.da.SearchCursor(table,fields,) as cursor:
@@ -139,7 +141,7 @@ def get_editor():
 def set_reviewer(user):
     """sets the user for the reviewer
         note that this table should only ever have a single record"""
-    table = input_gdb + os.sep + input_tfl + '_Transaction_Details'
+    table = input_gdb + os.sep + tfl_number + '_Transaction_Details'
     fields = ['Review_Passed','Reviewed_Date','Reviewed_By']
     with arcpy.da.UpdateCursor(table,fields,) as cursor:
         for row in cursor:
