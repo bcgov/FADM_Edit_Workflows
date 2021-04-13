@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+{% endblock %}
+
+{% block body %}
+    <form method="POST" class="form">
+        <label for="PF">Choose a Provincial Forest:</label>  
+        <select name="PF">
+            {% for pf in prov_forests %}
+                <option value="{{pf}}" {% if pf == prov_forest %} selected {% endif %}> {{pf}}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Submit</button>
+
+        <button class="btn" type="submit" style="position: absolute; right: 0; margin-right: 2%;" formaction="/updates_in_progress">View Active Updates</button>
+    </form>
+
+    
+    {% if pf_db_data %}
+    <div style="overflow-x:auto;">
+        <table class="tables" id="tables">
+            <tr>
+                <th>Update</th>
+                <th>Lands File</th>
+                <th>PFT Number</th>
+                <th>Date Received</th>
+                <th>Area [ha]</th>
+                <th>Legal Description</th>
+                <th>Purpose</th>
+                <th>Deletion Number</th>
+                <th>Date Signed</th>
+                <th>Notes</th>
+                <!-- <th></th> -->
+            </tr>
+                {% for entry in pf_db_data %}
+                    <tr>
+                        <td>
+                            <a href="/update/{{prov_forest}}/{{entry.id}}"> >>> </a>
+                        </td>
+                        <td>{% if entry.lands_file %}{{ entry.lands_file }}{% endif %}</td>
+                        <td>{% if entry.prov_forest_tracking_num %}{{ entry.prov_forest_tracking_num }}{% endif %}</td>
+                        <td>{% if entry.date_received %}{{ entry.date_received }}{% endif %}</td>
+                        <td>{% if entry.ha_deleted %}{{ entry.ha_deleted }}{% endif %}</td>
+                        <td class="left">{% if entry.legal_description %}{{ entry.legal_description }}{% endif %}</td>
+                        <td class="left">{% if entry.purpose %}{{ entry.purpose }}{% endif %}</td>
+                        <td>{% if entry.deletion_number %}{{ entry.deletion_number }}{% endif %}</td>
+                        <td>{% if entry.date_signed %}{{ entry.date_signed }}{% endif %}</td>
+                        <td class="left">{% if entry.notes %}{{ entry.notes }}{% endif %}</td>
+
+                        <!-- <td>
+                            <a href="/delete/{{prov_forest}}/{{entry.id}}"> <i class="bi bi-trash"></i> </a>
+                        </td> -->
+                    </tr>
+                {% endfor %}
+        </table>
+    </div>
+        <form method="GET" class="form" action="{{ url_for('add_new_pft', prov_forest=prov_forest) }}">
+            <button class="btn" name="new_pft" type="submit" value='{{ prov_forest }}'>Create New PFT</button>
+        </form>
+    {% endif %}
+    
+{% endblock %}

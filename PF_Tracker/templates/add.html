@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='add.css') }}">
+{% endblock %}
+
+
+{% block body %}
+
+<form method="POST" class="form">
+    <label for="pft"> PF Tracking Number: </label>
+    <input type="text" name="pft" value='{{ new_pft_num }}' readonly>
+    <br>
+    <label for="date_rec"> Date Received: </label>
+    <input type="date" name="date_rec" placeholder="YYYY-MM-DD" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" title="YYYY-MM-DD">
+    <br>
+    <label for="lands_file"> Lands File Number: </label>
+    <input type="text" name="lands_file">
+    <br>
+    <label for="area"> Area (hectares): </label>
+    <input type="number" step="any" name="area">
+    <br>
+    <label for="purpose"> Purpose: </label>
+    <textarea name="purpose" id="purpose" rows="3" cols="50"></textarea>
+    <br>
+    <label for="legal"> Legal Description: </label>
+    <textarea name="legal" id="legal" rows="3" cols="50"></textarea>
+    <br>
+    <label for="notes"> Notes: </label>
+    <textarea name="notes" id="notes" rows="3" cols="50"></textarea>
+
+    <br>
+    <input type="submit" name="add_record" value="Submit">
+    <input type="submit" form="cancelForm" value="Cancel" class="action_btn">
+</form>
+<form id="cancelForm" action="{{ request.referrer }}">
+</form>
+
+
+{% endblock %}

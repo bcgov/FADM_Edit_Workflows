@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+{% endblock %}
+
+{% block body %}
+    <h2>Updates In Progress</h2>
+    <form action="{{ url_for('index') }}">
+        <input class="btn" type="submit" style="margin-left: 20px" value="Home">
+    </form>
+    {% if updates_in_progress %}
+        <div style="overflow-x:auto;">
+            <table class="tables" id="tables">
+                <tr>
+                    <th>Update</th>
+                    <th>Provincial Forest</th>
+                    <th>Lands File</th>
+                    <th>PFT Number</th>
+                    <th>Date Received</th>
+                    <th>Area [ha]</th>
+                    <th>Legal Description</th>
+                    <th>Purpose</th>
+                    <th>Deletion Number</th>
+                    <th>Date Signed</th>
+                    <!-- <th></th> -->
+                </tr>
+                    {% for entry in updates_in_progress %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('update', prov_forest=entry.prov_forest_name, id=entry.id) }}"> >>> </a>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('show_pf', prov_forest=entry.prov_forest_name) }}">{{ entry.prov_forest_name }}</a>
+                            </td>
+                            <td>{% if entry.lands_file %}{{ entry.lands_file }}{% endif %}</td>
+                            <td>{% if entry.prov_forest_tracking_num %}{{ entry.prov_forest_tracking_num }}{% endif %}</td>
+                            <td>{% if entry.date_received %}{{ entry.date_received }}{% endif %}</td>
+                            <td>{% if entry.ha_deleted %}{{ entry.ha_deleted }}{% endif %}</td>
+                            <td>{% if entry.legal_description %}{{ entry.legal_description }}{% endif %}</td>
+                            <td>{% if entry.purpose %}{{ entry.purpose }}{% endif %}</td>
+                            <td>{% if entry.deletion_number %}{{ entry.deletion_number }}{% endif %}</td>
+                            <td>{% if entry.date_signed %}{{ entry.date_signed }}{% endif %}</td>
+                            <!-- <td>
+                                <a href="/delete/{{prov_forest}}/{{entry.id}}"> <i class="bi bi-trash"></i> </a>
+                            </td> -->
+                        </tr>
+                    {% endfor %}
+            </table>
+        </div>
+    {% endif %}
+    
+{% endblock %}

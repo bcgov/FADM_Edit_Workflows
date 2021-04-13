@@ -1,0 +1,4 @@
+pyinstaller -F -w --add-data "./templates/*;templates" --add-data "./static/*;static" --icon=forest1.ico app.py --name "PF Tracker"
+
+
+Once pyinstaller has created an executable, simply copy the 'config.ini' file to the same location as the exe.

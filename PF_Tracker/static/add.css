@@ -1,0 +1,29 @@
+body, html {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h4 {
+    margin: 0 auto;
+    text-align: center;
+}
+
+input, label, select {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+label[for="legal"]{
+    display: block;
+}
+
+label[for="purpose"]{
+    display: block;
+}
+
+label[for="notes"]{
+    display: block;
+}
+
+.form {
+    margin-left: 20px;
+}

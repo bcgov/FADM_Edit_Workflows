@@ -1,0 +1,17 @@
+# General stuff
+__pycache__
+pf_tracker_flask
+.vscode
+gdb_test.py
+
+# pyintaller files
+build/
+dist/
+*.spec
+
+# database files
+*.gdb
+*.db
+
+# real config files with 
+config.ini
