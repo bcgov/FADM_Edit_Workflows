@@ -167,10 +167,10 @@ def updates_in_progress():
 
 if __name__=="__main__":
     import encodings.idna
-
     app.secret_key='abf11811c65e3ba0341a9fa7701ca0f5'
-    app.run(debug=True)
+    
+    # app.run(debug=True)
 
-    # ui = FlaskUI(app)
-    # ui.app_mode=False
-    # ui.run()
+    ui = FlaskUI(app)
+    ui.app_mode=False
+    ui.run()

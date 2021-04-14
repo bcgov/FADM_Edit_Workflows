@@ -37,7 +37,7 @@
     </select>
     <br>
     <label for="del_num"> Deletion Number: </label>
-    <input type="number" name="del_num" value="{% if pft_to_update.deletion_number %}{{ pft_to_update.deletion_number}}{% endif %}">
+    <input type="text" name="del_num" value="{% if pft_to_update.deletion_number %}{{ pft_to_update.deletion_number}}{% endif %}">
     <br>
     <label for="date_signed"> Date Signed: </label>
     <input type="date" name="date_signed" placeholder="YYYY-MM-DD" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}" title="YYYY-MM-DD" value="{% if pft_to_update.date_signed %}{{ pft_to_update.date_signed}}{% endif %}">
