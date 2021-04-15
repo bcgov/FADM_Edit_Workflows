@@ -13,5 +13,7 @@ dist/
 *.gdb
 *.db
 
-# real config files with 
-config.ini
+# real config files
+*config.ini
+
+
