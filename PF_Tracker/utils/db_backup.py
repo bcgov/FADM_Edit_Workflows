@@ -17,7 +17,7 @@ def get_backup_file_list(backup_directory):
 
 
 def delete_oldest_backup(backup_file_list):
-    oldest_file = min(backup_file_list, key=os.path.getmtime)
+    oldest_file = min(backup_file_list, key=os.path.getctime)
   
     os.remove(oldest_file)
 
