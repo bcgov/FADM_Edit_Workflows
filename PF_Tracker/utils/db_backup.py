@@ -3,6 +3,10 @@ import os
 import datetime
 import configparser
 
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
 config = configparser.ConfigParser()
 config.read(R'backup_config.ini')
 
