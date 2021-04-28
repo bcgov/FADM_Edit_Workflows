@@ -42,3 +42,15 @@ ui = FlaskUI(app)
 ui.app_mode=False
 ui.run()
 ```
+
+## Database
+
+The Provincial Forest Tracker database is a simple SQLite database. It includes all the fields that were previously captured by the Provincial Forest tracking spreadsheet, along with new fields created to add functionality in tracking and reporting PF deletion status and history. Many of these fields are not used in the front-end application but are preserved for record keeping purposes. These fields and their simple relationships can be seen in Figure 1.
+
+These database fields all have datatypes that can be viewed by examining the database (I recommend [DB Browser for SQLite](https://sqlitebrowser.org/)). Even though these fields are designated as TEXT, INTEGER, REAL, etc, SQLite does not inherently check data being entered into the database. This means any values can be placed into any column (Ex. The string ‘Hello’ could be placed into a field with datatype INTEGER). This can either be an annoying or a handy feature of SQLite depending on usage. For example, it is beneficial for our team to be able to put the string ‘Cancelled’ into the ‘deletion_number’ [INTEGER] column to signify a specific deletion was cancelled. The HTML input forms handle restricting input where needed.
+
+<p align="center">
+  <img src="images/PF_ERD.png" />
+</p>
+
+## Building the EXE
