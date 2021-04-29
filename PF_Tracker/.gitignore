@@ -16,4 +16,6 @@ dist/
 # real config files
 *config.ini
 
+# test files
+*test.py
 

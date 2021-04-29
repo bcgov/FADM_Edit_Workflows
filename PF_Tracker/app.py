@@ -160,7 +160,7 @@ def update(prov_forest, id):
 def updates_in_progress():
     received_cut_off_date = date(year=2019, month=1, day=1)
 
-    updates_in_progress = db.session.query(PFT_tracking).filter(PFT_tracking.ministerial_order == None, PFT_tracking.date_received >= received_cut_off_date).order_by(PFT_tracking.date_received).all()
+    updates_in_progress = db.session.query(PFT_tracking).filter(PFT_tracking.deletion_number == None, PFT_tracking.date_received >= received_cut_off_date).order_by(PFT_tracking.date_received).all()
 
     return render_template('updates_in_progress.html', updates_in_progress=updates_in_progress)
 
