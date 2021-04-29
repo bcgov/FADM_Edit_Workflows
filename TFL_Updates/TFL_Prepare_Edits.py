@@ -72,6 +72,10 @@ def runapp(tfl_prepare_edits):
             workspace = TFL_EDITS_FOLDER + os.sep + folder_basename + os.sep + \
             'data' + os.sep + 'FADM_' + folder_basename + '.gdb' + os.sep + 'TFL_Data'
 
+            # enable editor tracking on lines
+            tfl_lines = os.path.join(workspace, folder_basename + '_Line')
+            arcpy.EnableEditorTracking_management(tfl_lines, 'created_user', 'created_date', 'last_edited_user', 'last_edited_date', 'NO_ADD_FIELDS', 'DATABASE_TIME')
+
             #Delete all tables from Edit gdb except the TFL Lines and Schedule A
             delete_tables(workspace)
 
