@@ -10,7 +10,7 @@
 <body>
     <h1>Provincial Forest Tracker</h1>
     <h2>{{ prov_forest }}</h2>
-    <h4>{{ forest_number }}</h4>
+    {% if forest_number %}<h4>Provincial Forest #{{ forest_number }}</h4>{% endif %}
     {% for category, message in get_flashed_messages(with_categories=True) %}
         <div class="alert alert-{{category}}">{{ message }}</div>
     {% endfor %}
