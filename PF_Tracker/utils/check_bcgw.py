@@ -124,12 +124,12 @@ def main():
         
         if sql:
             result = query_bcgw(cursor, sql)
-            print(f'{entry.id} {entry.prov_forest_name} - {entry.prov_forest_tracking_num} - {entry.date_signed} ::::: {result} :::: {search}')
+            # print(f'{entry.id} {entry.prov_forest_name} - {entry.prov_forest_tracking_num} - {entry.date_signed} ::::: {result} :::: {search}')
             if result == None:
                 not_in_bcgw += 1
             else:
                 update_database(entry.id, result, search)
-    print(not_in_bcgw)
+    print(f'Not in BCGW: {not_in_bcgw}')
             
 
 if __name__=='__main__':

@@ -3,12 +3,14 @@
 An app built in Python for tracking Provincial Forest deletions in BC. It is essentially a CRUD (create, read, update, delete) app built purposely without the ability to delete records using the interface. 
 This app is built with Flask, though it is not being deployed as a web application. [flaskwebgui](https://github.com/ClimenteA/flaskwebgui) is being used to make this Flask app run as a desktop application with the front-end built using HTML/CSS.
 
+When a Provincial Forest Deletion is initiated, a new tracking number for that forest must be created. This tracking number contains information about that specific deletion such as the date it was received, a legal description of the deletion, the area of the deletion in hectares, the legal document type, the deletion number, and more. The PF Tracker app allows users to easily keep track of all this information by adding, updating, and querying deletions in the app. Moving to this form of database/UI ensures data integrity and allows for advanced querying on the status and completeness of the Provincial Forest records.
+
 ## Using the App
 The PF Tracker app executable will be stored on the government network and is to be used by the FADM group and the Forest Tentures Branch for adding, viewing, or updating ongoing and past provincial forest deletions within BC.
 
-To run the app, simply double-click the 'PF Tracker.exe'. Because the executable is typically running off the network, it can take some time to open. When it does open, it will open in the users default internet browser. One you are finished using the application, it should be closed simply by closing the browser tab.
+To run the app, simply double-click the 'PF Tracker.exe'. Because the executable is typically running off the network, it can take some time to open. When it does open, it will open in the users default internet browser. Once you are finished using the application, it should be closed simply by closing the browser tab.
 
-To create a tracking number for a PF, simply select the forest from the drop down, scroll to the bottom of the table and click 'Create New PFT'. The tracking number will be created automatically and the user will be able to fill in additional information. 
+To create a tracking number for a PF, simply select the forest name from the drop down, scroll to the bottom of the table and click 'Create New PFT'. The tracking number will be created automatically and the user will be able to fill in additional information. 
 
 Current active updates can be viewed by clicking the 'View Active Updates' button from the main menu.
 
