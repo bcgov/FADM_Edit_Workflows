@@ -72,6 +72,12 @@ These database fields all have datatypes that can be viewed by examining the dat
 </p>
 
 
+## Scheduled Processes
+There are 2 Jenkins tasks being run to aid in updating and backing up the PF Tracker database. utils\db_backup.py is a simple script which copies the database to a backup location weekly, renaming it by date and only keeping the 4 most recent backups. 
+
+utils\check_bcgw.py iterates through all the records in the PF Tracker database, comparing them to the records of the BCGW Provincial Forest Deletion layer to determine if the record is in the BCGW or not. 
+
+
 ## Building the EXE
 [PyInstaller](https://github.com/pyinstaller/pyinstaller) is used to create an executable of the app, allowing anyone with access to use it without needing to setup Python on their own machine. The command for creating the executable is
 ```
