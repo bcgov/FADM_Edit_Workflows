@@ -11,8 +11,7 @@ TFL_Updates/test_helpers/
 **/.vscode
 
 #config_folder
-**/config_files
-config/
+**/config.ini
 
 # ESRI toolboxes
 # *.tbx
