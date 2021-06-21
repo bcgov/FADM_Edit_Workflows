@@ -32,6 +32,7 @@
                 <th>Deletion Number</th>
                 <th>Date Signed</th>
                 <th>Notes</th>
+                <th>In BCGW</th>
                 <!-- <th></th> -->
             </tr>
                 {% for entry in pf_db_data %}
@@ -48,6 +49,7 @@
                         <td>{% if entry.deletion_number %}{{ entry.deletion_number }}{% endif %}</td>
                         <td>{% if entry.date_signed %}{{ entry.date_signed }}{% endif %}</td>
                         <td class="left">{% if entry.notes %}{{ entry.notes }}{% endif %}</td>
+                        <td>{% if entry.in_bcgw %}{{entry.in_bcgw}}{% endif %}</td>
 
                         <!-- <td>
                             <a href="/delete/{{prov_forest}}/{{entry.id}}"> <i class="bi bi-trash"></i> </a>
