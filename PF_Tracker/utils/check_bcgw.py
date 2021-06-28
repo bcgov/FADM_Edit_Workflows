@@ -140,7 +140,7 @@ def update_database(id, bcgw_record, sql_query_criteria):
         pft_to_update.in_bcgw = 'Yes'
         pft_to_update.bcgw_sql_search = sql_query_criteria
     else: # This is not being used until some checks are completed on the BCGW/PF Tracker
-        pft_to_update.in_bcgw = 'No'
+        pft_to_update.in_bcgw = None
 
     session.commit()
 
@@ -160,8 +160,8 @@ def main():
             # print(f'{entry.id} {entry.prov_forest_name} - {entry.prov_forest_tracking_num} - {entry.date_signed} ::::: {result} :::: {search}')
             if result == None:
                 not_in_bcgw += 1
-            else:
-                update_database(entry.id, result, search)
+            
+        update_database(entry.id, result, search)
     print(f'Not in BCGW: {not_in_bcgw}')
             
 
