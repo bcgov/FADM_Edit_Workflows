@@ -49,9 +49,7 @@ def check_deletion_intersect(new_deletion_shape, layer2):
         arcpy.AddWarning('No overlaps with the BCGW Provincial Forest Deletion layer\n')
         return None
 
-    
 
-    
 def check_parcel_intersect(new_deletion_layer, parcel_layer):
     intersect = arcpy.Intersect_analysis([new_deletion_layer, parcel_layer], 'in_memory/intersect')
     intersect_count = arcpy.GetCount_management(intersect)
@@ -72,7 +70,6 @@ def check_parcel_intersect(new_deletion_layer, parcel_layer):
 
     load_reference_layers()
     
-
 
 def get_bcgw_connection(bcgw_uname, bcgw_pw):
 # SET UP BCGW CONNECTION 
@@ -137,6 +134,8 @@ def main():
     check_parcel_intersect(deletion_shape, icf) # check the new deletion shape to see if it overlaps with ICF
 
     pmbc = get_pmbc_layer(BCGWConnection) # get PMBC layer from BCGW
+    os.remove(BCGWConnection)
+    
     check_parcel_intersect(deletion_shape, pmbc)  # check the new deletion shape to see if it overlaps with PMBC
 
     add_layers(new_deletion_shape, zoom=True)   # add new deletion shape to the map and zoom to it
