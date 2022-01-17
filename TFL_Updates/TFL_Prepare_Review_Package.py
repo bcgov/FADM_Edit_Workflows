@@ -207,7 +207,7 @@ def check_poly(tfl_poly, input_gdb, BCGWConnection):
         return(False)
     elif 'Replacement' in poly_types:
         #If the change is replacement - check to make sure all schedule A polygons are inside the boundary
-        schedule_a_outside = check_schedule_a_is_within(input_tfl,input_gdb)
+        schedule_a_outside = check_schedule_a_is_within(tfl_number,input_gdb)
         if not schedule_a_outside:
             return(False)
         #If replacement - get the list of intersecting timber licenses for confirmation by Forest Tenures
