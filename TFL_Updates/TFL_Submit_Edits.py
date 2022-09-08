@@ -33,7 +33,6 @@ TFL_STAGING_FOLDER = TFL_Path.STAGING
 TFL_PENDING_FOLDERS = TFL_Path.PENDING_FOLDERS
 TFL_FINAL_FOLDERS = TFL_Path.FINAL_FOLDER
 TFL_ARCHIVE = TFL_Path.ARCHIVE
-#ICF = r'\\WHSE_CADASTRE.CBM_INTGD_CADASTRAL_FABRIC_SVW'
 PMBC = r'\\WHSE_CADASTRE.PMBC_PARCEL_FABRIC_POLY_SVW'
 TANTALIS = r'\\WHSE_TANTALIS.TA_SURVEY_PARCELS_SVW'
 ###################################################################################
@@ -585,14 +584,12 @@ def update_submitter(check_out_date):
 
 def intersect_cadastre(bcgw_connection, datasets_to_update, check_out_date):
     """If change is replacement, intersects all TFL lines with cadastral datasets
-       (ICF, PMBC, Tantalis), otherwise, intersects only updated lines. Saves
+       (PMBC, Tantalis), otherwise, intersects only updated lines. Saves
        Intersecting features to a FC in the local GDB to provide context for
        future research."""
-    #remove ICF BCGW connection/intersection
-    #icf_whse = bcgw_connection + ICF
+    #removed ICF BCGW connection/intersection
     pmbc_whse = bcgw_connection + PMBC
     tantalis_whse = bcgw_connection + TANTALIS
-    #cadastral_to_copy = {'ICF': icf_whse,'PMBC': pmbc_whse ,'TANTALIS': tantalis_whse}
     cadastral_to_copy = {'PMBC': pmbc_whse ,'TANTALIS': tantalis_whse}
     if 'Replacement' in datasets_to_update:
         #make feature layer of all active lines
