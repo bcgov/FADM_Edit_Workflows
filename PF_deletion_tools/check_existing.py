@@ -10,7 +10,6 @@ geobc_lib = config.get('DEFAULT', 'geobc_lib')
 sys.path.append(geobc_lib)
 import geobc
 
-ICF = config.get('DEFAULT', 'icf')
 PMBC = config.get('DEFAULT', 'pmbc')
 PROV_FOREST_DELETIONS = config.get('DEFAULT', 'prov_forest_deletions')
 
@@ -26,13 +25,6 @@ def get_pmbc_layer(BCGWConnection):
     pmbc = arcpy.MakeFeatureLayer_management(BCGWConnection + pmbc, 'PMBC')
 
     return pmbc
-
-
-def get_icf_layer(BCGWConnection):
-    icf = R'\\WHSE_CADASTRE.CBM_INTGD_CADASTRAL_FABRIC_SVW'
-    icf = arcpy.MakeFeatureLayer_management(BCGWConnection + icf, 'ICF')
-
-    return icf
 
 
 def check_deletion_intersect(new_deletion_shape, layer2):
@@ -67,8 +59,6 @@ def check_parcel_intersect(new_deletion_layer, parcel_layer):
             arcpy.AddWarning('\t--{}'.format(owner))
     else:
         arcpy.AddWarning('No overlaps found with {}\n'.format(parcel_layer))
-
-    load_reference_layers()
     
 
 def get_bcgw_connection(bcgw_uname, bcgw_pw):
@@ -106,12 +96,6 @@ def add_layers(new_layer, zoom=False, rename=None):
             arcpy.RefreshActiveView()
 
 
-def load_reference_layers():
-    add_layers(PROV_FOREST_DELETIONS)
-    add_layers(ICF)
-    add_layers(PMBC)
-
-
 def main():
     new_deletion_shape = arcpy.GetParameterAsText(0)
     working_gdb = arcpy.GetParameterAsText(1)
@@ -129,9 +113,6 @@ def main():
 
     forest_del = get_prov_forest_deletion_layer(BCGWConnection) # get the Provincial Forest Deletion layer from the BCGW
     intersect_layer = check_deletion_intersect(deletion_shape, forest_del)  # Check to see if the new deletion shape overlaps the BCGW deletion layer
-
-    icf = get_icf_layer(BCGWConnection) # get ICF layer from the BCGW
-    check_parcel_intersect(deletion_shape, icf) # check the new deletion shape to see if it overlaps with ICF
 
     pmbc = get_pmbc_layer(BCGWConnection) # get PMBC layer from BCGW
     os.remove(BCGWConnection)
