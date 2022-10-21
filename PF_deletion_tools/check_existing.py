@@ -1,5 +1,5 @@
-import arcpy 
-from ConfigParser import ConfigParser
+import arcpy
+from configparser import ConfigParser
 import sys
 import os
 
@@ -38,7 +38,7 @@ def check_deletion_intersect(new_deletion_shape, layer2):
         return intersect_layer
 
     else:
-        arcpy.AddWarning('No overlaps with the BCGW Provincial Forest Deletion layer\n')
+        arcpy.AddMessage('No overlaps with the BCGW Provincial Forest Deletion layer\n')
         return None
 
 
@@ -47,8 +47,9 @@ def check_parcel_intersect(new_deletion_layer, parcel_layer):
     intersect_count = arcpy.GetCount_management(intersect)
     count = intersect_count[0]
     if int(count) > 0:
-        arcpy.AddMessage('\n{} overlap(s) found in {}.'.format(count, parcel_layer))
-
+        deletion_shape_name = arcpy.Describe(new_deletion_layer).name
+        arcpy.AddWarning('\n{} overlap(s) found in {}.'.format(count, parcel_layer))
+        pmbc_intersect_layer = arcpy.CopyFeatures_management(intersect, deletion_shape_name+'_PMBC_Intersect')
         ownership = []
         fields = [f.name for f in arcpy.ListFields(intersect, 'OWNER*')]
         with arcpy.da.SearchCursor(intersect, fields) as cursor:
@@ -57,12 +58,15 @@ def check_parcel_intersect(new_deletion_layer, parcel_layer):
         arcpy.AddWarning('The overlaps have the following ownership types in {}:'.format(parcel_layer))
         for owner in set(ownership):
             arcpy.AddWarning('\t--{}'.format(owner))
+        return pmbc_intersect_layer
+
     else:
-        arcpy.AddWarning('No overlaps found with {}\n'.format(parcel_layer))
-    
+        arcpy.AddMessage('No overlaps found with {}\n'.format(parcel_layer))
+        return None
+
 
 def get_bcgw_connection(bcgw_uname, bcgw_pw):
-# SET UP BCGW CONNECTION 
+# SET UP BCGW CONNECTION
     arcpy.AddMessage(" ")
     arcpy.AddMessage("Setting up the BCGW connection...")
 
@@ -79,21 +83,33 @@ def get_bcgw_connection(bcgw_uname, bcgw_pw):
 
 
 def add_layers(new_layer, zoom=False, rename=None):
-    mxd = arcpy.mapping.MapDocument('CURRENT')
-    df = arcpy.mapping.ListDataFrames(mxd, '*')[0]
-    loaded_layers = [layer.name for layer in arcpy.mapping.ListLayers(mxd, "", df)]
-    
-    layer_to_add = arcpy.mapping.Layer(new_layer)
+    if arc_pro == True:
+        aprx = arcpy.mp.ArcGISProject('CURRENT')
+        map = aprx.listMaps('*')[0]
+        mapView = aprx.listMaps()[0]
+        loaded_layers = [layer.name for layer in map.listLayers()]
+        layer_to_add = arcpy.MakeFeatureLayer_management(new_layer, new_layer).getOutput(0)
+    else:
+        mxd = arcpy.mapping.MapDocument('CURRENT')
+        df = arcpy.mapping.ListDataFrames(mxd, '*')[0]
+        loaded_layers = [layer.name for layer in arcpy.mapping.ListLayers(mxd, "", df)]
+        layer_to_add = arcpy.mapping.Layer(new_layer)
+
     if rename:
         layer_to_add.name = rename
 
     if layer_to_add.name not in loaded_layers:
-        arcpy.mapping.AddLayer(df, layer_to_add, add_position='AUTO_ARRANGE')
-
-        if zoom:
-            extent = layer_to_add.getExtent()
-            df.extent = extent
-            arcpy.RefreshActiveView()
+        if arc_pro == True:
+            map.addLayer(layer_to_add, 'AUTO_ARRANGE')
+            if zoom:
+                extent = mapView.defaultCamera.getExtent()
+                map.Extent = extent
+        else:
+            arcpy.mapping.AddLayer(df, layer_to_add, add_position='AUTO_ARRANGE')
+            if zoom:
+                extent = layer_to_add.getExtent()
+                df.extent = extent
+                arcpy.RefreshActiveView()
 
 
 def main():
@@ -102,8 +118,18 @@ def main():
     bcgw_uname = arcpy.GetParameterAsText(2)
     bcgw_pw = arcpy.GetParameterAsText(3)
     arcpy.env.workspace = working_gdb
-    arcpy.env.overwriteOutput = True 
+    arcpy.env.overwriteOutput = True
 
+    arc_product = arcpy.GetInstallInfo()['ProductName']
+    arc_version = arcpy.GetInstallInfo()['Version']
+
+    global arc_pro
+    if arc_product == 'ArcGISPro':
+        arc_pro = True
+    else:
+        arc_pro = False
+
+    arcpy.AddMessage(arc_product+" "+arc_version+" detected. Running appropriate python code:")
 
     BCGWConnection = get_bcgw_connection(bcgw_uname,bcgw_pw) # get BCGW connection
 
@@ -115,15 +141,20 @@ def main():
     intersect_layer = check_deletion_intersect(deletion_shape, forest_del)  # Check to see if the new deletion shape overlaps the BCGW deletion layer
 
     pmbc = get_pmbc_layer(BCGWConnection) # get PMBC layer from BCGW
+    pmbc_intersect_layer = check_parcel_intersect(deletion_shape, pmbc) # check the new deletion shape to see if it overlaps with PMBC
     os.remove(BCGWConnection)
-    
-    check_parcel_intersect(deletion_shape, pmbc)  # check the new deletion shape to see if it overlaps with PMBC
 
+    arcpy.AddMessage(" ")
+    arcpy.AddMessage("Adding layers to map...")
     add_layers(new_deletion_shape, zoom=True)   # add new deletion shape to the map and zoom to it
 
     if intersect_layer: # if the intersection layer is not None, load it into the map
         intersect_layer_name = arcpy.Describe(intersect_layer).name
         add_layers(intersect_layer_name)
+
+    if pmbc_intersect_layer: # if the parcel intersection layer is not None, load it into the map
+        pmbc_intersect_layer_name = arcpy.Describe(pmbc_intersect_layer).name
+        add_layers(pmbc_intersect_layer_name)
 
 
 if __name__=='__main__':
