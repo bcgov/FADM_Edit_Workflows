@@ -339,14 +339,17 @@ def update_tfl_overview():
     with arcpy.da.SearchCursor(licensee_lookup,fields,where_clause) as cursor:
         for row in cursor:
             licensee = row[1]
-    fields = ['FOREST_FILE_ID','LICENCEE','TFL_TYPE', 'FEATURE_CLASS_SKEY','WHEN_UPDATED','WHO_UPDATED']
+    #edit code to reflect the schema change: remove WHO_UPDATED, OBJECT_VERSION_SKEY, FEATURE_CODE
+    #change COMMENTS to DESCRIPTION, DOCUMENT_TYPE to LEGISLATIVE_TOOL, INS_AMD_ID to DOCUMENT_NUMBER
+    #fields = ['FOREST_FILE_ID','LICENCEE','TFL_TYPE', 'FEATURE_CLASS_SKEY','WHEN_UPDATED','WHO_UPDATED']
+    fields = ['FOREST_FILE_ID','LICENCEE','TFL_TYPE', 'FEATURE_CLASS_SKEY','WHEN_UPDATED']
     with arcpy.da.UpdateCursor(staging_overview,fields,where_clause) as cursor:
         for row in cursor:
             row[1] = licensee
             row[2] = 'See Licence'
             row[3] = 830
             row[4] = submitted_timestamp
-            row[5] = 'GeoBC'
+            #row[5] = 'GeoBC'
             cursor.updateRow(row)
     arcpy.Delete_management(input_gdb + os.sep + 'TFL_Boundary_dissolve')
     arcpy.Delete_management(overview_fl)
@@ -369,13 +372,15 @@ def update_tfl_agreement():
     arcpy.Append_management(tfl_poly,staging_agreement_bdy,'NO_TEST')
     #update the required fields in the new record
     where_clause = "FOREST_FILE_ID = '" + forest_file_id + "'"
-    fields = ['FOREST_FILE_ID','EFFECTIVE_DATE','FEATURE_CLASS_SKEY','WHO_UPDATED','WHEN_UPDATED']
+    #fields = ['FOREST_FILE_ID','EFFECTIVE_DATE','FEATURE_CLASS_SKEY','WHO_UPDATED','WHEN_UPDATED']
+    fields = ['FOREST_FILE_ID','EFFECTIVE_DATE','FEATURE_CLASS_SKEY','WHEN_UPDATED']
     with arcpy.da.UpdateCursor(staging_agreement_bdy,fields,where_clause) as cursor:
         for row in cursor:
             row[1] = effective_date
             row[2] = 830
-            row[3] = 'GeoBC'
-            row[4] = submitted_timestamp
+            #row[3] = 'GeoBC'
+            #row[4] = submitted_timestamp
+            row[3] = submitted_timestamp
             cursor.updateRow(row)
     arcpy.AddMessage('Updated TFL Agreement Boundary in Staging folder')
 
@@ -398,21 +403,24 @@ def update_tfl_addition():
     f_map_tool = arcpy.FieldMap()
     f_map_tool.addInputField(TFL_Boundary_addition, 'Legislative_Tool')
     tool                  = f_map_tool.outputField
-    tool.name             = 'DOCUMENT_TYPE'
+    #change the field name from document_type to legislative_tool by YJ
+    tool.name             = 'Legislative_Tool'
     f_map_tool.outputField  = tool
     field_mappings_addition.addFieldMap(f_map_tool)
     #document number
     f_map_number = arcpy.FieldMap()
     f_map_number.addInputField(TFL_Boundary_addition, 'Document_Number')
     number                  = f_map_number.outputField
-    number.name             = 'INS_AMD_ID'
+    #change INS_AMD_ID TO DOCUMENT_NUMBER by yj
+    number.name             = 'DOCUMENT_NUMBEER'
     f_map_number.outputField  = number
     field_mappings_addition.addFieldMap(f_map_number)
     #description
     f_map_description = arcpy.FieldMap()
     f_map_description.addInputField(TFL_Boundary_addition, 'Description')
     description             = f_map_description.outputField
-    description.name        = 'COMMENTS'
+    #change COMMENTS to DESCRIPTION by yj
+    description.name        = 'Description'
     f_map_description.outputField  = description
     field_mappings_addition.addFieldMap(f_map_description)
     #Forest File ID
@@ -443,11 +451,13 @@ def update_tfl_addition():
 
     #update the required fields in the new record
     where_clause = "WHEN_UPDATED IS NULL"
-    fields = ['WHO_UPDATED','WHEN_UPDATED']
+    #remove WHO_UPDATED by yj
+    fields = ['WHEN_UPDATED']
     with arcpy.da.UpdateCursor(staging_addition,fields,where_clause) as cursor:
         for row in cursor:
-            row[0] = 'GeoBC'
-            row[1] = datetime.now()
+            #row[0] = 'GeoBC'
+            #row[1] = datetime.now()
+            row[0] = datetime.now()
             cursor.updateRow(row)
     arcpy.AddMessage('Updated TFL Addition in Staging folder')
 
@@ -516,11 +526,14 @@ def update_tfl_deletion():
 
     #update the required fields in the new record
     where_clause = "WHEN_UPDATED IS NULL"
-    fields = ['WHO_UPDATED','WHEN_UPDATED']
+    #remove WHO_UPDATED by yj
+    #fields = ['WHO_UPDATED','WHEN_UPDATED']
+    fields = ['WHEN_UPDATED']
     with arcpy.da.UpdateCursor(staging_deletion,fields,where_clause) as cursor:
         for row in cursor:
-            row[0] = 'GeoBC'
-            row[1] = datetime.now()
+            #row[0] = 'GeoBC'
+            #row[1] = datetime.now()
+            row[0] = datetime.now()
             cursor.updateRow(row)
     arcpy.AddMessage('Updated TFL Deletion in Staging folder')
 
@@ -559,12 +572,16 @@ def update_tfl_schedule_a():
     #append the new addition
     arcpy.Append_management(tfl_schedule_a,staging_schedule_a,'NO_TEST')
     #update the required fields in the new records
-    fields = ['WHO_UPDATED','WHEN_UPDATED','FEATURE_CLASS_SKEY']
+    #remove WHO_UPDATED by yj
+    #fields = ['WHO_UPDATED','WHEN_UPDATED','FEATURE_CLASS_SKEY']
+    fields = ['WHEN_UPDATED','FEATURE_CLASS_SKEY']
     with arcpy.da.UpdateCursor(staging_schedule_a,fields,where_clause) as cursor:
         for row in cursor:
-            row[0] = 'GeoBC'
-            row[1] = datetime.now()
-            row[2] = 837
+            #row[0] = 'GeoBC'
+            #row[1] = datetime.now()
+            #row[2] = 837
+            row[0] = datetime.now()
+            row[1] = 837
             cursor.updateRow(row)
     arcpy.AddMessage('Updated TFL Schedule A in Staging folder')
     arcpy.Delete_management('TFL_Schedule_A_FL')
